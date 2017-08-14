@@ -20,6 +20,294 @@ msgctxt "#32001"
 msgid "General"
 msgstr "General"
 
+msgctxt "#32002"
+msgid "Hide protected channels"
+msgstr "Hide protected channels"
+
 msgctxt "#32003"
 msgid "Enable debug logging"
 msgstr "Enable debug logging"
+
+msgctxt "#32004"
+msgid "Hide duplicate channels"
+msgstr "Hide duplicate channels"
+
+msgctxt "#32005"
+msgid "Mark new show"
+msgstr "Mark new show"
+
+msgctxt "#32010"
+msgid "Feature not implemented yet"
+msgstr "Feature not implemented yet"
+
+msgctxt "#32101"
+msgid "EPG Settings"
+msgstr "EPG Settings"
+
+msgctxt "#32102"
+msgid "Choose EPG type"
+msgstr "Choose EPG type"
+
+msgctxt "#32103"
+msgid "No settings required for SiliconDust EPG"
+msgstr "No settings required for SiliconDust EPG"
+
+msgctxt "#32104"
+msgid "Choose State"
+msgstr "Choose State"
+
+msgctxt "#32105"
+msgid "Choose Region"
+msgstr "Choose Region"
+
+msgctxt "#32106"
+msgid "freepg.tv UID"
+msgstr "freepg.tv UID"
+
+msgctxt "#32107"
+msgid "Select XMLTV file"
+msgstr "Select XMLTV file"
+
+msgctxt "#32121"
+msgid "SiliconDust EPG"
+msgstr "SiliconDust EPG"
+
+msgctxt "#32122"
+msgid "Freepg.tv URL"
+msgstr "Freepg.tv URL"
+
+msgctxt "#32123"
+msgid "IceTV URL"
+msgstr "IceTV URL"
+
+msgctxt "#32124"
+msgid "Local XMLTV file"
+msgstr "Local XMLTV file"
+
+msgctxt "#32130"
+msgid "QLD"
+msgstr "QLD"
+
+msgctxt "#32131"
+msgid "NSW"
+msgstr "NSW"
+
+msgctxt "#32132"
+msgid "ACT"
+msgstr "ACT"
+
+msgctxt "#32133"
+msgid "VIC"
+msgstr "VIC"
+
+msgctxt "#32134"
+msgid "TAS"
+msgstr "TAS"
+
+msgctxt "#32135"
+msgid "SA"
+msgstr "SA"
+
+msgctxt "#32136"
+msgid "NT"
+msgstr "NT"
+
+msgctxt "#32137"
+msgid "WA"
+msgstr "WA"
+
+msgctxt "#32201"
+msgid "Recording Settings"
+msgstr "Recording Settings"
+
+msgctxt "#32901"
+msgid "Canberra"
+msgstr "Canberra"
+
+msgctxt "#32902"
+msgid "Sydney"
+msgstr "Sydney"
+
+msgctxt "#32903"
+msgid "Broken Hill"
+msgstr "Broken Hill"
+
+msgctxt "#32904"
+msgid "Central Coast"
+msgstr "Central Coast"
+
+msgctxt "#32905"
+msgid "Coffs Harbour"
+msgstr "Coffs Harbour"
+
+msgctxt "#32906"
+msgid "Griffith"
+msgstr "Griffith"
+
+msgctxt "#32907"
+msgid "Lismore"
+msgstr "Lismore"
+
+msgctxt "#32908"
+msgid "Newcastle"
+msgstr "Newcastle"
+
+msgctxt "#32909"
+msgid "Orange/Dubbo"
+msgstr "Orange/Dubbo"
+
+msgctxt "#32910"
+msgid "Remote and Central"
+msgstr "Remote and Central"
+
+msgctxt "#32911"
+msgid "South Coast"
+msgstr "South Coast"
+
+msgctxt "#32912"
+msgid "Tamworth"
+msgstr "Tamworth"
+
+msgctxt "#32913"
+msgid "Taree/Port Macquarie"
+msgstr "Taree/Port Macquarie"
+
+msgctxt "#32914"
+msgid "Wagga Wagga"
+msgstr "Wagga Wagga"
+
+msgctxt "#32915"
+msgid "Wollongong"
+msgstr "Wollongong"
+
+msgctxt "#32916"
+msgid "Darwin"
+msgstr "Darwin"
+
+msgctxt "#32917"
+msgid "Regional NT"
+msgstr "Regional NT"
+
+msgctxt "#32918"
+msgid "Brisbane"
+msgstr "Brisbane"
+
+msgctxt "#32919"
+msgid "Cairns"
+msgstr "Cairns"
+
+msgctxt "#32920"
+msgid "Gold Coast"
+msgstr "Gold Coast"
+
+msgctxt "#32921"
+msgid "Mackay"
+msgstr "Mackay"
+
+msgctxt "#32922"
+msgid "Remote and Central"
+msgstr "Remote and Central"
+
+msgctxt "#32923"
+msgid "Rockhampton"
+msgstr "Rockhampton"
+
+msgctxt "#32924"
+msgid "Sunshine Coast"
+msgstr "Sunshine Coast"
+
+msgctxt "#32925"
+msgid "Toowoomba"
+msgstr "Toowoomba"
+
+msgctxt "#32926"
+msgid "Townsville"
+msgstr "Townsville"
+
+msgctxt "#32927"
+msgid "Wide Bay"
+msgstr "Wide Bay"
+
+msgctxt "#32928"
+msgid "Adelaide"
+msgstr "Adelaide"
+
+msgctxt "#32929"
+msgid "Port Augusta"
+msgstr "Port Augusta"
+
+msgctxt "#32930"
+msgid "Remote and Central"
+msgstr "Remote and Central"
+
+msgctxt "#32931"
+msgid "Riverland"
+msgstr "Riverland"
+
+msgctxt "#32932"
+msgid "South East SA"
+msgstr "South East SA"
+
+msgctxt "#32933"
+msgid "Spencer Gulf"
+msgstr "Spencer Gulf"
+
+msgctxt "#32934"
+msgid "Hobart"
+msgstr "Hobart"
+
+msgctxt "#32935"
+msgid "Launceston"
+msgstr "Launceston"
+
+msgctxt "#32936"
+msgid "Melbourne"
+msgstr "Melbourne"
+
+msgctxt "#32937"
+msgid "Albury/Wodonga"
+msgstr "Albury/Wodonga"
+
+msgctxt "#32938"
+msgid "Ballarat"
+msgstr "Ballarat"
+
+msgctxt "#32939"
+msgid "Bendigo"
+msgstr "Bendigo"
+
+msgctxt "#32940"
+msgid "Geelong"
+msgstr "Geelong"
+
+msgctxt "#32941"
+msgid "Gippsland"
+msgstr "Gippsland"
+
+msgctxt "#32942"
+msgid "Mildura/Sunraysia"
+msgstr "Mildura/Sunraysia"
+
+msgctxt "#32943"
+msgid "Shepparton"
+msgstr "Shepparton"
+
+msgctxt "#32944"
+msgid "Perth"
+msgstr "Perth"
+
+msgctxt "#32945"
+msgid "Albany"
+msgstr "Albany"
+
+msgctxt "#32946"
+msgid "Bunbury"
+msgstr "Bunbury"
+
+msgctxt "#32947"
+msgid "Mandurah"
+msgstr "Mandurah"
+
+msgctxt "#32948"
+msgid "Regional WA"
+msgstr "Regional WA"

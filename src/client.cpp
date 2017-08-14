@@ -77,6 +77,12 @@ void ADDON_ReadSettings(void)
 
   if (!g.XBMC->GetSetting("debug", &g.Settings.bDebug))
     g.Settings.bDebug = false;
+  
+  if (!g.XBMC->GetSetting("SD_EPG", &g.Settings.bSD_EPG))
+    g.Settings.bSD_EPG = true;
+  
+  if (!g.XBMC->GetSetting("XMLTV_Source", &g.Settings.sXMLTV))
+    g.Settings.sXMLTV = "";
 }
 
 ADDON_STATUS ADDON_Create(void* hdl, void* props)
@@ -145,26 +151,36 @@ void ADDON_Destroy()
 ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
 {
   if (g.Tuners == NULL)
+  {
     return ADDON_STATUS_OK;
-
+  }
+  
   if (strcmp(settingName, "hide_protected") == 0)
   {
     g.Settings.bHideProtected = *(bool*)settingValue;
     return ADDON_STATUS_NEED_RESTART;
   }
-  else
-  if (strcmp(settingName, "hide_duplicate") == 0)
+  else if (strcmp(settingName, "hide_duplicate") == 0)
   {
     g.Settings.bHideDuplicateChannels = *(bool*)settingValue;
     return ADDON_STATUS_NEED_RESTART;
   }
-  else
-  if (strcmp(settingName, "mark_new") == 0)
+  else if (strcmp(settingName, "mark_new") == 0)
+  {
     g.Settings.bMarkNew = *(bool*)settingValue;
-  else
-  if (strcmp(settingName, "debug") == 0)
+  }
+  else if (strcmp(settingName, "debug") == 0)
+  {
     g.Settings.bDebug = *(bool*)settingValue;
-
+  }
+  else if (strcmp(settingName, "SD_EPG") == 0)
+  {
+    g.Settings.bSD_EPG = *(bool*)settingValue;
+  }
+  else if (strcmp(settingName, "XMLTV_Source") == 0)
+  {
+    g.Settings.sXMLTV = *(char*)settingValue;
+  }
   return ADDON_STATUS_OK;
 }
 

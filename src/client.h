@@ -39,12 +39,16 @@ struct SettingsType
 		bHideDuplicateChannels = true;
 		bDebug = false;
 		bMarkNew = false;
+		bSD_EPG = true;
+		sXMLTV = "";
 	}
 
 	bool bHideProtected;
 	bool bHideDuplicateChannels;
 	bool bDebug;
 	bool bMarkNew;
+	bool bSD_EPG;
+	std::string sXMLTV;
 };
 
 struct GlobalsType
