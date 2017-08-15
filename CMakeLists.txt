@@ -25,11 +25,13 @@ set(DEPLIBS ${kodiplatform_LIBRARIES}
 
 set(PVRHDHOMERUN_SOURCES src/client.cpp
                          src/HDHomeRunTuners.cpp
-                         src/Utils.cpp)
+                         src/Utils.cpp
+                         src/EPG_SD.cpp)
 
 set(PVRHDHOMERUN_HEADERS src/client.h
                          src/HDHomeRunTuners.h
-                         src/Utils.h)
+                         src/Utils.h
+                         src/EPG_SD.h)
 
 if(WIN32)
   list(APPEND DEPLIBS ws2_32)

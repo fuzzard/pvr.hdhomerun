@@ -23,11 +23,12 @@
  */
 
 #include "client.h"
+
+#include "HDHomeRunTuners.h"
+#include "Utils.h"
 #include <xbmc_pvr_dll.h>
 #include <p8-platform/util/util.h>
 #include <p8-platform/threads/threads.h>
-#include "HDHomeRunTuners.h"
-#include "Utils.h"
 
 using namespace ADDON;
 
@@ -40,7 +41,7 @@ public:
   {
     for (;;)
     {
-      for (int i = 0; i < 60*60; i++)
+      for (int i = 0; i < g.iUpdateinterval; i++)
         if (P8PLATFORM::CThread::Sleep(1000))
           break;
       
@@ -78,8 +79,8 @@ void ADDON_ReadSettings(void)
   if (!g.XBMC->GetSetting("debug", &g.Settings.bDebug))
     g.Settings.bDebug = false;
   
-  if (!g.XBMC->GetSetting("SD_EPG", &g.Settings.bSD_EPG))
-    g.Settings.bSD_EPG = true;
+  if (!g.XBMC->GetSetting("epg_type", &g.Settings.iEPG))
+    g.XBMC->GetSetting("epg_type", &g.Settings.iEPG);
   
   if (!g.XBMC->GetSetting("XMLTV_Source", &g.Settings.sXMLTV))
     g.Settings.sXMLTV = "";
@@ -173,9 +174,9 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
   {
     g.Settings.bDebug = *(bool*)settingValue;
   }
-  else if (strcmp(settingName, "SD_EPG") == 0)
+  else if (strcmp(settingName, "epg_type") == 0)
   {
-    g.Settings.bSD_EPG = *(bool*)settingValue;
+    g.Settings.iEPG = *(int*)settingValue;
   }
   else if (strcmp(settingName, "XMLTV_Source") == 0)
   {

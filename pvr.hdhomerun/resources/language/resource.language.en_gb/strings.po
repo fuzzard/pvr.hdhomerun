@@ -49,8 +49,8 @@ msgid "Choose EPG type"
 msgstr "Choose EPG type"
 
 msgctxt "#32103"
-msgid "No settings required for SiliconDust EPG"
-msgstr "No settings required for SiliconDust EPG"
+msgid "Extended SiliconDust EPG"
+msgstr "Extended SiliconDust EPG"
 
 msgctxt "#32104"
 msgid "Choose State"

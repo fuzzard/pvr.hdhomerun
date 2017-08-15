@@ -39,16 +39,20 @@ struct SettingsType
 		bHideDuplicateChannels = true;
 		bDebug = false;
 		bMarkNew = false;
-		bSD_EPG = true;
+		iEPG = 0;
+		bSD_EPGAdvanced = false;
 		sXMLTV = "";
+
 	}
 
 	bool bHideProtected;
 	bool bHideDuplicateChannels;
 	bool bDebug;
 	bool bMarkNew;
-	bool bSD_EPG;
+	int iEPG;
+	bool bSD_EPGAdvanced;
 	std::string sXMLTV;
+
 };
 
 struct GlobalsType
@@ -61,6 +65,7 @@ struct GlobalsType
 		XBMC = NULL;
 		PVR = NULL;
 		Tuners = NULL;
+		iUpdateinterval = 60;
 	}
 
 	bool bCreated;
@@ -70,6 +75,7 @@ struct GlobalsType
 	String strClientPath;
 	ADDON::CHelper_libXBMC_addon* XBMC;
 	CHelper_libXBMC_pvr* PVR;
+	int iUpdateinterval;
 
 	HDHomeRunTuners* Tuners;
 
