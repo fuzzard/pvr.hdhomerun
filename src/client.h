@@ -42,7 +42,7 @@ struct SettingsType
 		iEPG = 0;
 		bSD_EPGAdvanced = false;
 		sXMLTV = "";
-
+    iUpdateinterval = 4*60*60;
 	}
 
 	bool bHideProtected;
@@ -50,6 +50,7 @@ struct SettingsType
 	bool bDebug;
 	bool bMarkNew;
 	int iEPG;
+  int iUpdateinterval;
 	bool bSD_EPGAdvanced;
 	std::string sXMLTV;
 
@@ -65,7 +66,6 @@ struct GlobalsType
 		XBMC = NULL;
 		PVR = NULL;
 		Tuners = NULL;
-		iUpdateinterval = 60;
 	}
 
 	bool bCreated;
@@ -75,7 +75,6 @@ struct GlobalsType
 	String strClientPath;
 	ADDON::CHelper_libXBMC_addon* XBMC;
 	CHelper_libXBMC_pvr* PVR;
-	int iUpdateinterval;
 
 	HDHomeRunTuners* Tuners;
 

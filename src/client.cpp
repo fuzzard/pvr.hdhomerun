@@ -41,7 +41,7 @@ public:
   {
     for (;;)
     {
-      for (int i = 0; i < g.iUpdateinterval; i++)
+      for (int i = 0; i < (g.Settings.iUpdateinterval); i++)
         if (P8PLATFORM::CThread::Sleep(1000))
           break;
       
@@ -78,12 +78,25 @@ void ADDON_ReadSettings(void)
 
   if (!g.XBMC->GetSetting("debug", &g.Settings.bDebug))
     g.Settings.bDebug = false;
-  
+
   if (!g.XBMC->GetSetting("epg_type", &g.Settings.iEPG))
     g.XBMC->GetSetting("epg_type", &g.Settings.iEPG);
-  
-  if (!g.XBMC->GetSetting("XMLTV_Source", &g.Settings.sXMLTV))
+
+  if (!g.XBMC->GetSetting("xmltv_file", &g.Settings.sXMLTV))
     g.Settings.sXMLTV = "";
+
+  if (!g.XBMC->GetSetting("sd_extended", &g.Settings.bSD_EPGAdvanced))
+    g.Settings.bSD_EPGAdvanced = false;
+
+  if (!g.XBMC->GetSetting("sd_extendedinterval", &g.Settings.iUpdateinterval))
+  {
+    g.Settings.iUpdateinterval = 12 * 60 * 60;
+  }
+  else
+  {
+    g.Settings.iUpdateinterval = (int)g.Settings.iUpdateinterval * 60 * 60;
+  }
+
 }
 
 ADDON_STATUS ADDON_Create(void* hdl, void* props)
@@ -116,8 +129,8 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 
   g.Tuners = new HDHomeRunTuners;
   if (g.Tuners == NULL)
-      return ADDON_STATUS_PERMANENT_FAILURE;
-  
+    return ADDON_STATUS_PERMANENT_FAILURE;
+
   ADDON_ReadSettings();
 
   if (g.Tuners)
@@ -125,7 +138,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
     g.Tuners->Update();
     g_UpdateThread.CreateThread(false);
   }
-  
+
   g.currentStatus = ADDON_STATUS_OK;
   g.bCreated = true;
 
@@ -178,9 +191,17 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
   {
     g.Settings.iEPG = *(int*)settingValue;
   }
-  else if (strcmp(settingName, "XMLTV_Source") == 0)
+  else if (strcmp(settingName, "xmltv_file") == 0)
   {
     g.Settings.sXMLTV = *(char*)settingValue;
+  }
+  else if (strcmp(settingName, "sd_extended") == 0)
+  {
+    g.Settings.bSD_EPGAdvanced = *(bool*)settingValue;
+  }
+  else if (strcmp(settingName, "sd_extendedinterval") == 0)
+  {
+    g.Settings.iUpdateinterval = *(int*)settingValue;
   }
   return ADDON_STATUS_OK;
 }
@@ -271,18 +292,18 @@ PVR_ERROR GetChannels(ADDON_HANDLE handle, bool bRadio)
   return g.Tuners ? g.Tuners->PvrGetChannels(handle, bRadio) : PVR_ERROR_SERVER_ERROR;
 }
 
-int GetChannelGroupsAmount(void) 
-{ 
+int GetChannelGroupsAmount(void)
+{
   return g.Tuners ? g.Tuners->PvrGetChannelGroupsAmount() : PVR_ERROR_SERVER_ERROR;
 }
 
-PVR_ERROR GetChannelGroups(ADDON_HANDLE handle, bool bRadio) 
-{ 
+PVR_ERROR GetChannelGroups(ADDON_HANDLE handle, bool bRadio)
+{
   return g.Tuners ? g.Tuners->PvrGetChannelGroups(handle, bRadio) : PVR_ERROR_SERVER_ERROR;
 }
 
-PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &group) 
-{ 
+PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &group)
+{
   return g.Tuners ? g.Tuners->PvrGetChannelGroupMembers(handle, group) : PVR_ERROR_SERVER_ERROR;
 }
 
@@ -304,18 +325,18 @@ PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS &signalStatus)
 {
   PVR_STRCPY(signalStatus.strAdapterName, "PVR HDHomeRun Adapter 1");
   PVR_STRCPY(signalStatus.strAdapterStatus, "OK");
-  
+
   return PVR_ERROR_NO_ERROR;
 }
 
-bool CanPauseStream(void) 
-{ 
-  return true; 
+bool CanPauseStream(void)
+{
+  return true;
 }
 
-bool CanSeekStream(void) 
-{ 
-  return true; 
+bool CanSeekStream(void)
+{
+  return true;
 }
 
 PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE* properties, unsigned int* iPropertiesCount)
@@ -330,8 +351,8 @@ PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE
   *iPropertiesCount = 1;
 
   return PVR_ERROR_NO_ERROR;
-} 
-  
+}
+
 /* UNUSED API FUNCTIONS */
 PVR_ERROR CallMenuHook(const PVR_MENUHOOK&, const PVR_MENUHOOK_DATA&) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES*) { return PVR_ERROR_NOT_IMPLEMENTED; }

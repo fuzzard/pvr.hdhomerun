@@ -24,9 +24,9 @@
  *  http://www.gnu.org/copyleft/gpl.html
  *
  */
- 
+
 #include "HDHomeRunTuners.h"
- 
+
 class EPG_SD
 {
  
@@ -37,5 +37,8 @@ class EPG_SD
   private:
     bool _UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
     bool _UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
+    void _addguideinfo(Json::Value jsonGuide);
+    unsigned long long _getEndTime(Json::Value jsonGuide);
+    bool _insert_guide_data(Json::Value &Guide, Json::Value insertdata);
 
 };

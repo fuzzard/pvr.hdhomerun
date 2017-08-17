@@ -68,6 +68,10 @@ msgctxt "#32107"
 msgid "Select XMLTV file"
 msgstr "Select XMLTV file"
 
+msgctxt "#32108"
+msgid "Extended Guide Check Interval (hrs)"
+msgstr "Extended Guide Check Interval (hrs)"
+
 msgctxt "#32121"
 msgid "SiliconDust EPG"
 msgstr "SiliconDust EPG"

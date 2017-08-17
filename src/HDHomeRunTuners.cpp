@@ -104,6 +104,7 @@ bool HDHomeRunTuners::Update(int nMode)
     //
     pTuner->Device = foundDevices[nTunerIndex];
 
+
     //
     // Guide
     //
