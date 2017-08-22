@@ -150,80 +150,95 @@ bool HDHomeRunTuners::Update(int nMode)
     //
     // Lineup
     //
-
     if (nMode & UpdateLineUp)
     {
-      strUrl = StringUtils::Format("%s/lineup.json", pTuner->Device.base_url);
-
-      KODI_LOG(LOG_DEBUG, "Requesting HDHomeRun lineup: %s", strUrl.c_str());
-
-      if (GetFileContents(strUrl.c_str(), strJson))
+		  if (!UpdateChannelLineUp(pTuner))
       {
-        if (jsonReader.parse(strJson, pTuner->LineUp) &&
-          pTuner->LineUp.type() == Json::arrayValue)
-        {
-          std::set<String> guideNumberSet;
-          int nChannelNumber = 1;
-
-          for (nIndex = 0; nIndex < pTuner->LineUp.size(); nIndex++)
-          {
-            Json::Value& jsonChannel = pTuner->LineUp[nIndex];
-            bool bHide;
-
-            bHide =
-              ((jsonChannel["DRM"].asBool() && g.Settings.bHideProtected) ||
-              (g.Settings.bHideDuplicateChannels && guideNumberSet.find(jsonChannel["GuideNumber"].asString()) != guideNumberSet.end()));
-
-            jsonChannel["_UID"] = PvrCalculateUniqueId(jsonChannel["GuideName"].asString() + jsonChannel["URL"].asString());
-            jsonChannel["_ChannelName"] = jsonChannel["GuideName"].asString();
-                    
-            // Find guide entry
-            for (nGuideIndex = 0; nGuideIndex < pTuner->Guide.size(); nGuideIndex++)
-            {
-              const Json::Value& jsonGuide = pTuner->Guide[nGuideIndex];
-              if (jsonGuide["GuideNumber"].asString() == jsonChannel["GuideNumber"].asString())
-              {
-                if (jsonGuide["Affiliate"].asString() != "")
-                  jsonChannel["_ChannelName"] = jsonGuide["Affiliate"].asString();
-                jsonChannel["_IconPath"] = jsonGuide["ImageURL"].asString();
-                break;
-              }
-            }
-
-            jsonChannel["_Hide"] = bHide;
-
-            if (bHide)
-            {
-              jsonChannel["_ChannelNumber"] = 0;
-              jsonChannel["_SubChannelNumber"] = 0;
-            }
-            else
-            {
-              int nChannel = 0, nSubChannel = 0;
-              if (sscanf(jsonChannel["GuideNumber"].asString().c_str(), "%d.%d", &nChannel, &nSubChannel) != 2)
-              {
-                nSubChannel = 0;
-                if (sscanf(jsonChannel["GuideNumber"].asString().c_str(), "%d", &nChannel) != 1)
-                  nChannel = nChannelNumber;
-              }
-              jsonChannel["_ChannelNumber"] = nChannel;
-              jsonChannel["_SubChannelNumber"] = nSubChannel;
-              guideNumberSet.insert(jsonChannel["GuideNumber"].asString());
-
-              nChannelNumber++;
-            }
-          }
-
-          KODI_LOG(LOG_DEBUG, "Found %u channels", pTuner->LineUp.size());
-        }
-        else
-        {
-          KODI_LOG(LOG_ERROR, "Failed to parse lineup", strUrl.c_str());
-        }
+        return false;
       }
     }
   }
-  return false;
+  return true;
+}
+
+bool HDHomeRunTuners::UpdateChannelLineUp(Tuner *pTuner)
+{
+  struct hdhomerun_discover_device_t foundDevices[16];
+  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+  int nTunerCount, nTunerIndex;
+  String strUrl, strJson;
+  Json::Reader jsonReader;
+
+  strUrl = StringUtils::Format("%s/lineup.json", pTuner->Device.base_url);
+
+  KODI_LOG(LOG_DEBUG, "Requesting HDHomeRun lineup: %s", strUrl.c_str());
+
+  if (GetFileContents(strUrl.c_str(), strJson))
+  {
+    if (jsonReader.parse(strJson, pTuner->LineUp) &&
+      pTuner->LineUp.type() == Json::arrayValue)
+    {
+      std::set<String> guideNumberSet;
+      int nChannelNumber = 1;
+
+      for (nIndex = 0; nIndex < pTuner->LineUp.size(); nIndex++)
+      {
+        Json::Value& jsonChannel = pTuner->LineUp[nIndex];
+        bool bHide;
+
+        bHide =
+          ((jsonChannel["DRM"].asBool() && g.Settings.bHideProtected) ||
+          (g.Settings.bHideDuplicateChannels && guideNumberSet.find(jsonChannel["GuideNumber"].asString()) != guideNumberSet.end()));
+
+        jsonChannel["_UID"] = PvrCalculateUniqueId(jsonChannel["GuideName"].asString() + jsonChannel["URL"].asString());
+        jsonChannel["_ChannelName"] = jsonChannel["GuideName"].asString();
+                    
+        // Find guide entry
+        for (nGuideIndex = 0; nGuideIndex < pTuner->Guide.size(); nGuideIndex++)
+        {
+          const Json::Value& jsonGuide = pTuner->Guide[nGuideIndex];
+          if (jsonGuide["GuideNumber"].asString() == jsonChannel["GuideNumber"].asString())
+          {
+            if (jsonGuide["Affiliate"].asString() != "")
+              jsonChannel["_ChannelName"] = jsonGuide["Affiliate"].asString();
+            jsonChannel["_IconPath"] = jsonGuide["ImageURL"].asString();
+            break;
+          }
+        }
+
+        jsonChannel["_Hide"] = bHide;
+
+        if (bHide)
+        {
+          jsonChannel["_ChannelNumber"] = 0;
+          jsonChannel["_SubChannelNumber"] = 0;
+        }
+        else
+        {
+          int nChannel = 0, nSubChannel = 0;
+          if (sscanf(jsonChannel["GuideNumber"].asString().c_str(), "%d.%d", &nChannel, &nSubChannel) != 2)
+          {
+            nSubChannel = 0;
+            if (sscanf(jsonChannel["GuideNumber"].asString().c_str(), "%d", &nChannel) != 1)
+              nChannel = nChannelNumber;
+          }
+          jsonChannel["_ChannelNumber"] = nChannel;
+          jsonChannel["_SubChannelNumber"] = nSubChannel;
+          guideNumberSet.insert(jsonChannel["GuideNumber"].asString());
+
+          nChannelNumber++;
+        }
+      }
+
+      KODI_LOG(LOG_DEBUG, "Found %u channels", pTuner->LineUp.size());
+    }
+    else
+    {
+      KODI_LOG(LOG_ERROR, "Failed to parse lineup", strUrl.c_str());
+      return false;
+    }
+  }
+  return true;
 }
 
 int HDHomeRunTuners::PvrGetChannelsAmount()

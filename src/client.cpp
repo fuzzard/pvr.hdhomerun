@@ -64,6 +64,8 @@ extern "C" {
 
 void ADDON_ReadSettings(void)
 {
+
+  char buffer[1024];
   if (g.XBMC == NULL)
     return;
 
