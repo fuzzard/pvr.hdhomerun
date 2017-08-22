@@ -26,8 +26,12 @@
  */
 
 #include "HDHomeRunTuners.h"
+#include "rapidxml/rapidxml.hpp"
+
+using namespace rapidxml;
 
 //namespace EPG_XML {
+
   class EPG_XML
   {
 
@@ -37,9 +41,10 @@
 
     protected:
       bool GzipInflate(const String &compressedBytes, String &uncompressedBytes);
-      bool _xmlparse(char *xmlbuffer);
+      bool _xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer);
 
     private:
+      bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
 
   };
 //}

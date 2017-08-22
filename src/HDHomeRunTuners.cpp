@@ -26,6 +26,7 @@
 #include "Utils.h"
 #include "HDHomeRunTuners.h"
 #include "EPG_SD.h"
+#include "EPG_XML.h"
 #include <set>
 #include <functional>
 
@@ -134,9 +135,19 @@ bool HDHomeRunTuners::Update(int nMode)
         case 3:
         {
           KODI_LOG(LOG_DEBUG, "Using XMLTV Local");
+          // if lineup not set do a pull from lineup.json
+          if (pTuner->LineUp.size() < 1)
+          {
+            if (!UpdateChannelLineUp(pTuner))
+            {
+              KODI_LOG(LOG_ERROR, "Unable to Update Tuner Lineup.");
+              return false;
+            }
+          }
           if (g.Settings.sXMLTV.length() > 1)
           {
-            KODI_LOG(LOG_DEBUG, "Reading XMLTV file: %s", g.Settings.sXMLTV.c_str());
+					  EPG_XML epg;
+						epg.UpdateGuide(pTuner, g.Settings.sXMLTV); 
           }
           else
           {

@@ -31,6 +31,9 @@
 #include "Utils.h"
 #include "zlib.h"
 
+#include <json/json.h>
+#include <string.h>
+
 using namespace ADDON;
 using namespace rapidxml;
 //using namespace EPG_XML;
@@ -115,60 +118,65 @@ bool EPG_XML::GzipInflate(const String &compressedBytes, String &uncompressedByt
   return true ;
 }
 
+/*
+ * Next two methods pulled from iptvsimple
+ * Author: Anton Fedchin
+ * Original: http://github.com/afedchin/xbmc-addon-iptvsimple/
+ */
+
+template<class Ch>
+inline bool GetNodeValue(const xml_node<Ch> * pRootNode, const char* strTag, std::string& strStringValue)
+{
+  xml_node<Ch> *pChildNode = pRootNode->first_node(strTag);
+  if (pChildNode == NULL)
+  {
+    return false;
+  }
+  strStringValue = pChildNode->value();
+  return true;
+}
+
+template<class Ch>
+inline bool GetAttributeValue(const xml_node<Ch> * pNode, const char* strAttributeName, std::string& strStringValue)
+{
+  xml_attribute<Ch> *pAttribute = pNode->first_attribute(strAttributeName);
+  if (pAttribute == NULL)
+  {
+    return false;
+  }
+  strStringValue = pAttribute->value();
+  return true;
+}
+
 bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
 {
   String strXMLlocation, strXMLdata, decompressed;
-  char *buffer;
-
-  KODI_LOG(LOG_DEBUG, "xmltvlocation '%s", xmltvlocation.c_str());
 
   if (GetFileContents(xmltvlocation, strXMLdata))
   {
-    KODI_LOG(LOG_DEBUG, "Read file: %s", xmltvlocation.c_str());
     // gzip packed
-    if (strXMLdata[0] == '\x1F' && strXMLdata[1] == '\x8B' && strXMLdata[2] == '\x08')
+    if (strXMLdata.substr(0,3) == "\x1F\x8B\x08")
     {
       if (!EPG_XML::GzipInflate(strXMLdata, decompressed))
       {
         KODI_LOG(LOG_DEBUG, "Invalid EPG file '%s': unable to decompress file.", xmltvlocation.c_str());
         return false;
       }
-      KODI_LOG(LOG_DEBUG, "Decompressed file: %s", xmltvlocation.c_str());
-      buffer = &(decompressed[0]);
-    
+      strXMLdata = decompressed;
     }
-    else
+    if (!(strXMLdata.substr(0,5) == "<?xml"))
     {
-      KODI_LOG(LOG_DEBUG, "File not gz compressed.");
-      buffer = &(strXMLdata[0]);
-    }
-    if (buffer[0] != '\x3C' || buffer[1] != '\x3F' || buffer[2] != '\x78' ||
-      buffer[3] != '\x6D' || buffer[4] != '\x6C')
-    {
-    // check for BOM
-      if (buffer[0] != '\xEF' || buffer[1] != '\xBB' || buffer[2] != '\xBF')
-      {
-        // check for tar archive
-        if (strcmp(buffer + 0x101, "ustar") || strcmp(buffer + 0x101, "GNUtar"))
-          buffer += 0x200; // RECORDSIZE = 512
-        else
-        {
-          KODI_LOG(LOG_DEBUG, "Invalid EPG file '%s': unable to parse file.", xmltvlocation.c_str());
-          return false;
-        }
-      }
-    }
-    else
-    {
-      KODI_LOG(LOG_DEBUG, "Invalid EPG file '%s': unable to parse file.",  xmltvlocation.c_str());
+      KODI_LOG(LOG_DEBUG, "Invalid EPG file: %s",  xmltvlocation.c_str());
       return false;
     }
-    EPG_XML::_xmlparse(buffer);
+    char *xmlbuffer = new char[strXMLdata.size() + 1];
+    strcpy(xmlbuffer, strXMLdata.c_str());
+    //EPG_XML::_xmlparse(pTuner, xmlbuffer);
   }
   return true;
 }
 
-bool EPG_XML::_xmlparse(char *xmlbuffer)
+bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
 {
   xml_document<> xmlDoc;
   try
@@ -182,11 +190,57 @@ bool EPG_XML::_xmlparse(char *xmlbuffer)
   }
 
   xml_node<> *pRootElement = xmlDoc.first_node("tv");
-  KODI_LOG(LOG_DEBUG, "Name of my first node is: %s", xmlDoc.first_node()->name());
   if (!pRootElement)
   {
-    KODI_LOG(LOG_ERROR, "Invalid EPG XML: no <tv> tag found");
+    KODI_LOG(LOG_DEBUG, "Invalid EPG XML: no <tv> tag found");
     return false;
+  }
+  
+  EPG_XML::_xmlparseelement(pTuner, pRootElement, "channel");
+
+  /*pRootElement = xmlDoc.first_node("programme");
+  if (!pRootElement)
+  {
+    KODI_LOG(LOG_DEBUG, "Invalid EPG XML: no <programme> tag found");
+    return false;
+  }
+  EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme");
+*/
+  return true;
+}
+
+bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement)
+{
+  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+  xml_node<> *pChannelNode = NULL;
+
+  for(pChannelNode = pRootNode->first_node(strElement); pChannelNode; pChannelNode = pChannelNode->next_sibling(strElement))
+  {
+    std::string strName;
+    std::string strId;
+
+    if (strcmp(strElement, "channel") == 0)
+    {
+      if(!GetAttributeValue(pChannelNode, "id", strId))
+        continue;
+      GetNodeValue(pChannelNode, "display-name", strName);
+      KODI_LOG(LOG_DEBUG, "ID: %s", strId.c_str());
+      KODI_LOG(LOG_DEBUG, "DisplayName: %s", strName.c_str());
+      xml_node<> *pChannelLCN = NULL;
+
+      for(pChannelLCN = pChannelNode->first_node("LCN"); pChannelLCN; pChannelLCN = pChannelLCN->next_sibling("LCN"))
+      {
+        KODI_LOG(LOG_DEBUG, "Channel Name: %s LCN: %s", strName.c_str(), pChannelLCN->value());
+      }
+    }
+    else if (strcmp(strElement, "programme") == 0)
+    {
+    }
+    else
+    {
+      KODI_LOG(LOG_DEBUG, "element parse fail");
+      return false;
+    }
   }
   return true;
 }

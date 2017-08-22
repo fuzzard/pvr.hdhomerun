@@ -1,6 +1,6 @@
 /*
- *      Copyright (C) 2015 Zoltan Csizmadia <zcsizmadia@gmail.com>
- *      https://github.com/zcsizmadia/pvr.hdhomerun
+ *      Copyright (C) 2017 Brent Murphy <bmurphy@bcmcs.net>
+ *      https://github.com/fuzzard/pvr.hdhomerun
  *
  *      Copyright (C) 2015 Zoltan Csizmadia <zcsizmadia@gmail.com>
  *      https://github.com/zcsizmadia/pvr.hdhomerun

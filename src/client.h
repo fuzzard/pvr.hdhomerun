@@ -52,7 +52,7 @@ struct SettingsType
 	int iEPG;
   int iUpdateinterval;
 	bool bSD_EPGAdvanced;
-	std::string sXMLTV;
+	String sXMLTV;
 
 };
 

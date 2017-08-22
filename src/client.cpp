@@ -84,8 +84,9 @@ void ADDON_ReadSettings(void)
   if (!g.XBMC->GetSetting("epg_type", &g.Settings.iEPG))
     g.XBMC->GetSetting("epg_type", &g.Settings.iEPG);
 
-  if (!g.XBMC->GetSetting("xmltv_file", &g.Settings.sXMLTV))
-    g.Settings.sXMLTV = "";
+  if (g.XBMC->GetSetting("xmltv_file", &buffer))
+    g.Settings.sXMLTV = buffer;
+    KODI_LOG(LOG_DEBUG, "Reading XMLTV file: %s", g.Settings.sXMLTV.c_str());
 
   if (!g.XBMC->GetSetting("sd_extended", &g.Settings.bSD_EPGAdvanced))
     g.Settings.bSD_EPGAdvanced = false;
