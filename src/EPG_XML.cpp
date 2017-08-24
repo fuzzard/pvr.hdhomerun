@@ -33,6 +33,7 @@
 
 #include <json/json.h>
 #include <string.h>
+#include <ctime>
 
 using namespace ADDON;
 using namespace rapidxml;
@@ -121,6 +122,7 @@ bool EPG_XML::GzipInflate(const String &compressedBytes, String &uncompressedByt
 /*
  * Next two methods pulled from iptvsimple
  * Author: Anton Fedchin
+ * Author: Pulse-Eight http://www.pulse-eight.com/
  * Original: http://github.com/afedchin/xbmc-addon-iptvsimple/
  */
 
@@ -152,6 +154,11 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
 {
   String strXMLlocation, strXMLdata, decompressed;
 
+  if (pTuner->Guide.size() < 1)
+  {
+    EPG_XML::_prepareGuide(pTuner);
+  }
+
   if (GetFileContents(xmltvlocation, strXMLdata))
   {
     // gzip packed
@@ -171,7 +178,7 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
     }
     char *xmlbuffer = new char[strXMLdata.size() + 1];
     strcpy(xmlbuffer, strXMLdata.c_str());
-    //EPG_XML::_xmlparse(pTuner, xmlbuffer);
+    EPG_XML::_xmlparse(pTuner, xmlbuffer);
   }
   return true;
 }
@@ -197,44 +204,87 @@ bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
   }
   
   EPG_XML::_xmlparseelement(pTuner, pRootElement, "channel");
-
-  /*pRootElement = xmlDoc.first_node("programme");
-  if (!pRootElement)
-  {
-    KODI_LOG(LOG_DEBUG, "Invalid EPG XML: no <programme> tag found");
-    return false;
-  }
   EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme");
-*/
+
   return true;
 }
 
-bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement)
+bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> *pRootNode, const char *strElement)
 {
-  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+  Json::Value::ArrayIndex nCount = 0;
   xml_node<> *pChannelNode = NULL;
+  String strPreviousId = "";
 
   for(pChannelNode = pRootNode->first_node(strElement); pChannelNode; pChannelNode = pChannelNode->next_sibling(strElement))
   {
-    std::string strName;
-    std::string strId;
-
+    std::string strName, strTitle, strSynopsis;
+    std::string strId, strStartTime, strEndTime;
+int tempSeriesId = 0;
     if (strcmp(strElement, "channel") == 0)
     {
       if(!GetAttributeValue(pChannelNode, "id", strId))
         continue;
       GetNodeValue(pChannelNode, "display-name", strName);
-      KODI_LOG(LOG_DEBUG, "ID: %s", strId.c_str());
-      KODI_LOG(LOG_DEBUG, "DisplayName: %s", strName.c_str());
+
       xml_node<> *pChannelLCN = NULL;
 
+      // Map XML strId to json Guide Number (channel number)
+      // Todo: possible option for how to map
+      //       currently maps to channel number from lineup, allow choice from lineup name?
       for(pChannelLCN = pChannelNode->first_node("LCN"); pChannelLCN; pChannelLCN = pChannelLCN->next_sibling("LCN"))
       {
-        KODI_LOG(LOG_DEBUG, "Channel Name: %s LCN: %s", strName.c_str(), pChannelLCN->value());
+        Json::Value& jsonChannel = EPG_XML::findJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
+        Json::Value* jsonChannelPointer = &jsonChannel;
+        channelMap[strId] = jsonChannelPointer ;
       }
     }
     else if (strcmp(strElement, "programme") == 0)
     {
+      // ToDo: Check other xml providers to see if any other data can be mapped
+      //<episode-num system="xmltv_ns">4.14.</episode-num>
+
+      // change map to be std::map<int channel number, std::pair<strId, jsonChannel>>
+      // channel number being unique, strId being on multiple channel numbers
+      if(!GetAttributeValue(pChannelNode, "channel", strId))
+        continue;
+      Json::Value &jsonChannel = *channelMap[strId];
+      GetAttributeValue(pChannelNode, "start", strStartTime);
+      GetAttributeValue(pChannelNode, "stop", strEndTime);
+      GetNodeValue(pChannelNode, "title", strTitle);
+      GetNodeValue(pChannelNode, "desc", strSynopsis);
+      jsonChannel["Guide"][nCount]["StartTime"] = EPG_XML::ParseDateTime(strStartTime);
+      jsonChannel["Guide"][nCount]["EndTime"] = EPG_XML::ParseDateTime(strEndTime);
+      jsonChannel["Guide"][nCount]["Title"] = strTitle;
+      jsonChannel["Guide"][nCount]["Synopsis"] = strSynopsis;
+      jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0;
+      jsonChannel["Guide"][nCount]["ImageURL"] = "";
+      jsonChannel["Guide"][nCount]["SeriesID"] = tempSeriesId;
+      // Look at alternative for an actual series id
+      // maybe other xml providers supply this as well
+      tempSeriesId++;
+      // ToDo: Add filter that contains genres
+      //jsonChannel["Guide"][nCount]["Filter"] = Json::Value(Json::arrayValue);
+ 
+     // This whole block needs to be changed to compensate for out of order channel id's
+     // second value in channel map to become a pair, with one value the Guide* and the other value 
+     // the channel number. may need to tweak this for best way to populate multiple channels from
+     // 1 programme element parse
+     if (strPreviousId.empty())
+      {
+        strPreviousId = strId;
+      }
+      else
+      {
+        if (strPreviousId ==  strId)
+        {
+          nCount++;
+        }
+        else
+        {
+          nCount = 0;
+          strPreviousId = strId;
+        }
+      }
     }
     else
     {
@@ -243,4 +293,74 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *
     }
   }
   return true;
+}
+
+void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
+{
+  Json::Value::ArrayIndex nIndex, nCount;
+  for (nIndex = 0, nCount = 0; nIndex < pTuner->LineUp.size(); nIndex++)
+  {
+    pTuner->Guide[nIndex]["GuideNumber"] = pTuner->LineUp[nIndex]["GuideNumber"];
+    pTuner->Guide[nIndex]["GuideName"] = pTuner->LineUp[nIndex]["GuideName"];
+    pTuner->Guide[nIndex]["ImageURL"] = "";
+    pTuner->Guide[nIndex]["Guide"] = Json::Value(Json::arrayValue);
+  }
+}
+
+Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, String searchData)
+{
+  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+
+  for (nIndex = 0, nCount = 0; nIndex < Guide.size(); nIndex++)
+  {
+    Json::Value& jsonGuide = Guide[nIndex];
+    //if (jsonGuide.type() != Json::arrayValue)
+    //  continue;
+    if (strcmp(jsonGuide[jsonElement].asString().c_str(), searchData.c_str()) == 0)
+    {
+      return jsonGuide;
+    }
+  }
+
+// Need to work out appropriate return type
+ // return (const&)Json::Value(Json::arrayValue);
+}
+
+/*
+ * ParseDateTime pulled from and iptvsimple and adapted slightly
+ * Author: Anton Fedchin
+ * Author: Pulse-Eight http://www.pulse-eight.com/
+ * Original: http://github.com/afedchin/xbmc-addon-iptvsimple/
+ */
+
+int EPG_XML::ParseDateTime(std::string& strDate)
+{
+  struct tm timeinfo;
+  memset(&timeinfo, 0, sizeof(tm));
+  char sign = '+';
+  int hours = 0;
+  int minutes = 0;
+
+  sscanf(strDate.c_str(), "%04d%02d%02d%02d%02d%02d %c%02d%02d", &timeinfo.tm_year, &timeinfo.tm_mon, &timeinfo.tm_mday, &timeinfo.tm_hour, &timeinfo.tm_min, &timeinfo.tm_sec, &sign, &hours, &minutes);
+
+  timeinfo.tm_mon  -= 1;
+  timeinfo.tm_year -= 1900;
+  timeinfo.tm_isdst = -1;
+
+  time_t current_time;
+  time(&current_time);
+  long offset = 0;
+#ifndef TARGET_WINDOWS
+  offset = -localtime(&current_time)->tm_gmtoff;
+#else
+  _get_timezone(&offset);
+#endif // TARGET_WINDOWS
+
+  long offset_of_date = (hours * 60 * 60) + (minutes * 60);
+  if (sign == '-')
+  {
+    offset_of_date = -offset_of_date;
+  }
+
+  return mktime(&timeinfo) - offset_of_date - offset;
 }

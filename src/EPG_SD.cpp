@@ -72,10 +72,10 @@ bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, bool advancedguide)
 
 bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
-  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+  Json::Value::ArrayIndex nIndex, nCount;
   String strJson, strUrlExtended, strJsonExtended;
   Json::Reader jsonReader;
-  bool fileContents, exitExtend, jsonAppend;
+  bool exitExtend;
   unsigned long long endTime;
   Json::Value tempGuide;
 
@@ -132,7 +132,7 @@ unsigned long long EPG_SD::_getEndTime(Json::Value jsonGuide)
 bool EPG_SD::_insert_guide_data(Json::Value &Guide, Json::Value strInsertdata)
 {
   Json::Value::ArrayIndex i = 0;
-  Json::Value::ArrayIndex nCount;
+  Json::Value::ArrayIndex nCount = 0;
 
   for (Json::Value::ArrayIndex j = 0; j < strInsertdata[i]["Guide"].size(); j++, nCount++)
   {
@@ -144,7 +144,7 @@ bool EPG_SD::_insert_guide_data(Json::Value &Guide, Json::Value strInsertdata)
 
 bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
-  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+  Json::Value::ArrayIndex nIndex, nCount;
   String strJson;
   Json::Reader jsonReader;
 
@@ -183,7 +183,7 @@ bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 void EPG_SD::_addguideinfo(Json::Value jsonGuide)
 {
 
-  Json::Value::ArrayIndex nCount;
+  Json::Value::ArrayIndex nCount = 0;
 
   for (Json::Value::ArrayIndex i = 0; i < jsonGuide.size(); i++, nCount++)
   {

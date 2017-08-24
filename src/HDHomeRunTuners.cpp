@@ -49,10 +49,7 @@ unsigned int HDHomeRunTuners::PvrCalculateUniqueId(const String& str)
 bool HDHomeRunTuners::Update(int nMode)
 {
   struct hdhomerun_discover_device_t foundDevices[16];
-  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
   int nTunerCount, nTunerIndex;
-  String strUrl, strJson;
-  Json::Reader jsonReader;
   Tuner* pTuner;
 
   //
@@ -174,9 +171,7 @@ bool HDHomeRunTuners::Update(int nMode)
 
 bool HDHomeRunTuners::UpdateChannelLineUp(Tuner *pTuner)
 {
-  struct hdhomerun_discover_device_t foundDevices[16];
-  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
-  int nTunerCount, nTunerIndex;
+  Json::Value::ArrayIndex nIndex, nGuideIndex;
   String strUrl, strJson;
   Json::Reader jsonReader;
 

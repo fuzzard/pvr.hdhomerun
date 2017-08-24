@@ -28,6 +28,8 @@
 #include "HDHomeRunTuners.h"
 #include "rapidxml/rapidxml.hpp"
 
+#include <json/json.h>
+
 using namespace rapidxml;
 
 //namespace EPG_XML {
@@ -42,10 +44,13 @@ using namespace rapidxml;
     protected:
       bool GzipInflate(const String &compressedBytes, String &uncompressedBytes);
       bool _xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer);
+      Json::Value& findJsonValue(Json::Value &Guide, String jsonElement, String searchData);
+      int ParseDateTime(String& strDate);
 
     private:
+      void _prepareGuide(HDHomeRunTuners::Tuner *pTuner);
       bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
-
+      std::map<String, Json::Value*> channelMap;
   };
 //}
 
