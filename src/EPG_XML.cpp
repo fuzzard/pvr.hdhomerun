@@ -121,9 +121,8 @@ bool EPG_XML::GzipInflate(const String &compressedBytes, String &uncompressedByt
 
 /*
  * Next two methods pulled from iptvsimple
- * Author: Anton Fedchin
+ * Author: Anton Fedchin http://github.com/afedchin/xbmc-addon-iptvsimple/
  * Author: Pulse-Eight http://www.pulse-eight.com/
- * Original: http://github.com/afedchin/xbmc-addon-iptvsimple/
  */
 
 template<class Ch>
@@ -150,6 +149,12 @@ inline bool GetAttributeValue(const xml_node<Ch> * pNode, const char* strAttribu
   return true;
 }
 
+/*
+ *  UpdateGuide()
+ *  Accepts a string pointing to an xml or gz compacted xml file. Can be local or remote
+ *  Parses xmltv formated file and populates pTuner->Guide with data.
+ *
+ */
 bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
 {
   String strXMLlocation, strXMLdata, decompressed;
@@ -171,6 +176,9 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
       }
       strXMLdata = decompressed;
     }
+    // data starts as an expected xml file
+    // Potentially look at using another xml library to run a proper verification on the
+    // file. Not important to this development at this stage however.
     if (!(strXMLdata.substr(0,5) == "<?xml"))
     {
       KODI_LOG(LOG_DEBUG, "Invalid EPG file: %s",  xmltvlocation.c_str());
@@ -178,7 +186,8 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
     }
     char *xmlbuffer = new char[strXMLdata.size() + 1];
     strcpy(xmlbuffer, strXMLdata.c_str());
-    EPG_XML::_xmlparse(pTuner, xmlbuffer);
+    if (!EPG_XML::_xmlparse(pTuner, xmlbuffer))
+      return false;
   }
   return true;
 }
@@ -203,8 +212,10 @@ bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
     return false;
   }
   
-  EPG_XML::_xmlparseelement(pTuner, pRootElement, "channel");
-  EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme");
+  if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "channel"))
+    return false;
+  if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme"))
+    return false;
 
   return true;
 }
@@ -219,7 +230,7 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
   {
     std::string strName, strTitle, strSynopsis;
     std::string strId, strStartTime, strEndTime;
-int tempSeriesId = 0;
+    int tempSeriesId = 0;
     if (strcmp(strElement, "channel") == 0)
     {
       if(!GetAttributeValue(pChannelNode, "id", strId))
@@ -295,6 +306,10 @@ int tempSeriesId = 0;
   return true;
 }
 
+/*
+ *  Create basic layout of Guide json for each channel listed by LineUp
+ *
+ */
 void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
 {
   Json::Value::ArrayIndex nIndex, nCount;
@@ -314,8 +329,6 @@ Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, Stri
   for (nIndex = 0, nCount = 0; nIndex < Guide.size(); nIndex++)
   {
     Json::Value& jsonGuide = Guide[nIndex];
-    //if (jsonGuide.type() != Json::arrayValue)
-    //  continue;
     if (strcmp(jsonGuide[jsonElement].asString().c_str(), searchData.c_str()) == 0)
     {
       return jsonGuide;

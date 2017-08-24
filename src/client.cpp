@@ -344,7 +344,13 @@ bool CanSeekStream(void)
 
 PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE* properties, unsigned int* iPropertiesCount)
 {
-  std::string strUrl = g.Tuners->_GetChannelStreamURL(channel->iUniqueId);
+  if (!channel || !properties || !iPropertiesCount)
+    return PVR_ERROR_SERVER_ERROR;
+
+  if (*iPropertiesCount < 1)
+    return PVR_ERROR_INVALID_PARAMETERS;
+
+  String strUrl = g.Tuners->_GetChannelStreamURL(channel->iUniqueId);
   if (strUrl.empty()) {
     return PVR_ERROR_FAILED;
   }
