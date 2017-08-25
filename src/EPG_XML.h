@@ -25,6 +25,7 @@
  *
  */
 
+#include "EPG.h"
 #include "HDHomeRunTuners.h"
 #include "rapidxml/rapidxml.hpp"
 
@@ -34,12 +35,13 @@ using namespace rapidxml;
 
 //namespace EPG_XML {
 
-  class EPG_XML
+  class EPG_XML : public EPGBase
   {
 
     public:
-      EPG_XML();
-      bool UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation);
+      EPG_XML(){};
+      virtual ~EPG_XML(){};
+      virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String);
 
     protected:
       bool GzipInflate(const String &compressedBytes, String &uncompressedBytes);

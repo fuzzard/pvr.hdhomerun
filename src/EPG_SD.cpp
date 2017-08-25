@@ -25,26 +25,26 @@
  *
  */
 
+
+#include "EPG.h"
 #include "EPG_SD.h"
- 
+
 #include "client.h"
 #include "HDHomeRunTuners.h"
 #include "Utils.h"
 #include <json/json.h>
- 
-using namespace ADDON;
- 
-EPG_SD::EPG_SD()
-{
-}
 
-bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, bool advancedguide)
+using namespace ADDON;
+
+REGISTER_CLASS("SD", EPG_SD);
+
+bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
 {
   String strUrl;
 
   strUrl = StringUtils::Format("http://my.hdhomerun.com/api/guide.php?DeviceAuth=%s", EncodeURL(pTuner->Device.device_auth).c_str());
 
-  if (advancedguide)
+  if (advancedguide == "AG")
   {
   // No guide Exists, so pull basic guide data to populate epg guide initially
     if (pTuner->Guide.size() < 1)

@@ -32,12 +32,14 @@ message(STATUS "ZLIB_LIBRARIES: ${ZLIB_LIBRARIES}")
 set(PVRHDHOMERUN_SOURCES src/client.cpp
                          src/HDHomeRunTuners.cpp
                          src/Utils.cpp
+                         src/EPG.cpp
                          src/EPG_SD.cpp
                          src/EPG_XML.cpp)
 
 set(PVRHDHOMERUN_HEADERS src/client.h
                          src/HDHomeRunTuners.h
                          src/Utils.h
+                         src/EPG.h
                          src/EPG_SD.h
                          src/EPG_XML.h)
 

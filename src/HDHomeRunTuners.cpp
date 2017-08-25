@@ -25,8 +25,7 @@
 #include "client.h"
 #include "Utils.h"
 #include "HDHomeRunTuners.h"
-#include "EPG_SD.h"
-#include "EPG_XML.h"
+#include "EPG.h"
 #include <set>
 #include <functional>
 
@@ -35,10 +34,6 @@ using namespace ADDON;
 static const String g_strGroupFavoriteChannels("Favorite channels");
 static const String g_strGroupHDChannels("HD channels");
 static const String g_strGroupSDChannels("SD channels");
-
-HDHomeRunTuners::HDHomeRunTuners()
-{
-}
 
 unsigned int HDHomeRunTuners::PvrCalculateUniqueId(const String& str)
 {
@@ -106,27 +101,36 @@ bool HDHomeRunTuners::Update(int nMode)
     //
     // Guide
     //
-    
+
     if (nMode & UpdateGuide)
     {
       switch(g.Settings.iEPG)
       {
         case 0:
         {
-          EPG_SD epg;
           KODI_LOG(LOG_DEBUG, "Using SiliconDust EPG");
-          epg.UpdateGuide(pTuner, g.Settings.bSD_EPGAdvanced);
+          auto epg = EPGFactory::Instance()->Create("SD");
+          if (g.Settings.bSD_EPGAdvanced)
+          {
+            if (!epg->UpdateGuide(pTuner, "AG"))
+              return false;
+          }
+          else
+          {
+            if (!epg->UpdateGuide(pTuner, ""))
+              return false;
+          }
 
           break;
         }
         case 1:
-	    {
-		  KODI_LOG(LOG_DEBUG, "Using freepg.tv EPG");
+        {
+          KODI_LOG(LOG_DEBUG, "Using freepg.tv EPG");
           break;
         }
         case 2:
-	    {
-		  KODI_LOG(LOG_DEBUG, "Using ICETV EPG");
+        {
+          KODI_LOG(LOG_DEBUG, "Using ICETV EPG");
           break;
         }
         case 3:
@@ -143,8 +147,9 @@ bool HDHomeRunTuners::Update(int nMode)
           }
           if (g.Settings.sXMLTV.length() > 1)
           {
-					  EPG_XML epg;
-						epg.UpdateGuide(pTuner, g.Settings.sXMLTV); 
+            auto epg = EPGFactory::Instance()->Create("SD");
+            if (!epg->UpdateGuide(pTuner, g.Settings.sXMLTV))
+              return false;
           }
           else
           {
@@ -160,7 +165,7 @@ bool HDHomeRunTuners::Update(int nMode)
     //
     if (nMode & UpdateLineUp)
     {
-		  if (!UpdateChannelLineUp(pTuner))
+      if (!UpdateChannelLineUp(pTuner))
       {
         return false;
       }
@@ -198,7 +203,7 @@ bool HDHomeRunTuners::UpdateChannelLineUp(Tuner *pTuner)
 
         jsonChannel["_UID"] = PvrCalculateUniqueId(jsonChannel["GuideName"].asString() + jsonChannel["URL"].asString());
         jsonChannel["_ChannelName"] = jsonChannel["GuideName"].asString();
-                    
+
         // Find guide entry
         for (nGuideIndex = 0; nGuideIndex < pTuner->Guide.size(); nGuideIndex++)
         {
@@ -265,12 +270,12 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannels(ADDON_HANDLE handle, bool bRadio)
 {
   PVR_CHANNEL pvrChannel;
   Json::Value::ArrayIndex nIndex;
-  
+
   if (bRadio)
     return PVR_ERROR_NO_ERROR;
 
   AutoLock l(this);
-  
+
   for (Tuners::const_iterator iterTuner = m_Tuners.begin(); iterTuner != m_Tuners.end(); iterTuner++)
     for (nIndex = 0; nIndex < iterTuner->LineUp.size(); nIndex++)
     {
@@ -286,10 +291,10 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannels(ADDON_HANDLE handle, bool bRadio)
       pvrChannel.iSubChannelNumber = jsonChannel["_SubChannelNumber"].asUInt();
       PVR_STRCPY(pvrChannel.strChannelName, jsonChannel["_ChannelName"].asString().c_str());
       PVR_STRCPY(pvrChannel.strIconPath, jsonChannel["_IconPath"].asString().c_str());
-      
+
       g.PVR->TransferChannelEntry(handle, &pvrChannel);
     }
-  
+
   return PVR_ERROR_NO_ERROR;
 }
 
@@ -362,13 +367,13 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannelGroups(ADDON_HANDLE handle, bool bRadio)
 
   if (bRadio)
     return PVR_ERROR_NO_ERROR;
-      
+
   memset(&channelGroup, 0, sizeof(channelGroup));
 
   channelGroup.iPosition = 1;
   PVR_STRCPY(channelGroup.strGroupName, g_strGroupFavoriteChannels.c_str());
   g.PVR->TransferChannelGroup(handle, &channelGroup);
-  
+
   channelGroup.iPosition++;
   PVR_STRCPY(channelGroup.strGroupName, g_strGroupHDChannels.c_str());
   g.PVR->TransferChannelGroup(handle, &channelGroup);
@@ -411,8 +416,8 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannelGroupMembers(ADDON_HANDLE handle, const 
   return PVR_ERROR_NO_ERROR;
 }
 
-std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId) 
-{  
+std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId)
+{
     Json::Value::ArrayIndex nIndex;
 
     AutoLock l(this);
@@ -422,13 +427,13 @@ std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId)
         for (nIndex = 0; nIndex < iterTuner->LineUp.size(); nIndex++)
         {
             const Json::Value& jsonChannel = iterTuner->LineUp[nIndex];
-		
+
             if (jsonChannel["_UID"].asUInt() == iUniqueId)
             {
                 std::string url = jsonChannel["URL"].asString();
                 return url;
             }
         }
-    }        
+    }
     return "";
 }

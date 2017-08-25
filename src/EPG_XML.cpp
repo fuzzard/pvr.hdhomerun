@@ -25,6 +25,7 @@
  *
  */
 
+#include "EPG.h"
 #include "EPG_XML.h"
 #include "HDHomeRunTuners.h"
 #include "rapidxml/rapidxml.hpp"
@@ -39,9 +40,7 @@ using namespace ADDON;
 using namespace rapidxml;
 //using namespace EPG_XML;
 
-EPG_XML::EPG_XML()
-{
-}
+REGISTER_CLASS("XML", EPG_XML);
 
 /*
  * This method uses zlib to decompress a gzipped file in memory.
@@ -246,7 +245,7 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       {
         Json::Value& jsonChannel = EPG_XML::findJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
         Json::Value* jsonChannelPointer = &jsonChannel;
-        channelMap[strId] = jsonChannelPointer ;
+        channelMap[strId] = jsonChannelPointer;
       }
     }
     else if (strcmp(strElement, "programme") == 0)

@@ -25,22 +25,47 @@
  *
  */
 
-#include "HDHomeRunTuners.h"
 #include "EPG.h"
 
-class EPG_SD : public EPGBase
+/*
+ *  Author: John Cumming
+ *  Created: 2016-02-02 Tue 21:21
+ *  http://www.jsolutions.co.uk/C++/objectfactory.html
+ */
+
+Registrar::Registrar(String name, std::function<EPGBase*(void)> classFactoryFunction)
 {
+    // register the class factory function
+    EPGFactory::Instance()->RegisterFactoryFunction(name, classFactoryFunction);
+}
 
-  public:
-    EPG_SD(){};
-    virtual ~EPG_SD(){};
-    virtual bool UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide);
 
-  private:
-    bool _UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
-    bool _UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
-    void _addguideinfo(Json::Value jsonGuide);
-    unsigned long long _getEndTime(Json::Value jsonGuide);
-    bool _insert_guide_data(Json::Value &Guide, Json::Value insertdata);
+EPGFactory * EPGFactory::Instance()
+{
+    static EPGFactory factory;
+    return &factory;
+}
 
-};
+
+void EPGFactory::RegisterFactoryFunction(String name, std::function<EPGBase*(void)> classFactoryFunction)
+{
+    // register the class factory function 
+    factoryFunctionRegistry[name] = classFactoryFunction;
+}
+
+
+std::shared_ptr<EPGBase> EPGFactory::Create(String name)
+{
+  EPGBase * instance = nullptr;
+
+  // find name in the registry and call factory method.
+  auto it = factoryFunctionRegistry.find(name);
+  if(it != factoryFunctionRegistry.end())
+    instance = it->second();
+
+  // wrap instance in a shared ptr and return
+  if(instance != nullptr)
+    return std::shared_ptr<EPGBase>(instance);
+  else
+    return nullptr;
+}
