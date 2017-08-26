@@ -296,7 +296,7 @@ void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
 
 Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, String searchData)
 {
-  Json::Value::ArrayIndex nIndex, nCount, nGuideIndex;
+  Json::Value::ArrayIndex nIndex, nCount;
 
   for (nIndex = 0, nCount = 0; nIndex < Guide.size(); nIndex++)
   {
