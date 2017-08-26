@@ -35,6 +35,7 @@
 #include <json/json.h>
 #include <string.h>
 #include <ctime>
+#include <vector>
 
 using namespace ADDON;
 using namespace rapidxml;
@@ -237,64 +238,44 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       GetNodeValue(pChannelNode, "display-name", strName);
 
       xml_node<> *pChannelLCN = NULL;
-
-      // Map XML strId to json Guide Number (channel number)
-      // Todo: possible option for how to map
-      //       currently maps to channel number from lineup, allow choice from lineup name?
+      std::vector<Json::Value*> vGuide;
       for(pChannelLCN = pChannelNode->first_node("LCN"); pChannelLCN; pChannelLCN = pChannelLCN->next_sibling("LCN"))
       {
         Json::Value& jsonChannel = EPG_XML::findJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
         Json::Value* jsonChannelPointer = &jsonChannel;
-        channelMap[strId] = jsonChannelPointer;
+        vGuide.push_back(jsonChannelPointer);
       }
+      channelMap[strId] = vGuide;
     }
     else if (strcmp(strElement, "programme") == 0)
     {
       // ToDo: Check other xml providers to see if any other data can be mapped
       //<episode-num system="xmltv_ns">4.14.</episode-num>
-
-      // change map to be std::map<int channel number, std::pair<strId, jsonChannel>>
-      // channel number being unique, strId being on multiple channel numbers
       if(!GetAttributeValue(pChannelNode, "channel", strId))
         continue;
-      Json::Value &jsonChannel = *channelMap[strId];
-      GetAttributeValue(pChannelNode, "start", strStartTime);
-      GetAttributeValue(pChannelNode, "stop", strEndTime);
-      GetNodeValue(pChannelNode, "title", strTitle);
-      GetNodeValue(pChannelNode, "desc", strSynopsis);
-      jsonChannel["Guide"][nCount]["StartTime"] = EPG_XML::ParseDateTime(strStartTime);
-      jsonChannel["Guide"][nCount]["EndTime"] = EPG_XML::ParseDateTime(strEndTime);
-      jsonChannel["Guide"][nCount]["Title"] = strTitle;
-      jsonChannel["Guide"][nCount]["Synopsis"] = strSynopsis;
-      jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0;
-      jsonChannel["Guide"][nCount]["ImageURL"] = "";
-      jsonChannel["Guide"][nCount]["SeriesID"] = tempSeriesId;
-      // Look at alternative for an actual series id
-      // maybe other xml providers supply this as well
-      tempSeriesId++;
+      std::vector<Json::Value*> vGuide = channelMap[strId];
+      for(std::vector<Json::Value*>::iterator it = vGuide.begin(); it != vGuide.end(); ++it) {
+        Json::Value* jsonChannelPointer = *it;
+        Json::Value& jsonChannel = *jsonChannelPointer;
+
+        GetAttributeValue(pChannelNode, "start", strStartTime);
+        GetAttributeValue(pChannelNode, "stop", strEndTime);
+        GetNodeValue(pChannelNode, "title", strTitle);
+        GetNodeValue(pChannelNode, "desc", strSynopsis);
+        jsonChannel["Guide"][nCount]["StartTime"] = EPG_XML::ParseDateTime(strStartTime);
+        jsonChannel["Guide"][nCount]["EndTime"] = EPG_XML::ParseDateTime(strEndTime);
+        jsonChannel["Guide"][nCount]["Title"] = strTitle;
+        jsonChannel["Guide"][nCount]["Synopsis"] = strSynopsis;
+        jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0;
+        jsonChannel["Guide"][nCount]["ImageURL"] = "";
+        jsonChannel["Guide"][nCount]["SeriesID"] = tempSeriesId;
+
+        // Look at alternative for an actual series id
+        // maybe other xml providers supply this as well
+        tempSeriesId++;
+      }
       // ToDo: Add filter that contains genres
       //jsonChannel["Guide"][nCount]["Filter"] = Json::Value(Json::arrayValue);
- 
-     // This whole block needs to be changed to compensate for out of order channel id's
-     // second value in channel map to become a pair, with one value the Guide* and the other value 
-     // the channel number. may need to tweak this for best way to populate multiple channels from
-     // 1 programme element parse
-     if (strPreviousId.empty())
-      {
-        strPreviousId = strId;
-      }
-      else
-      {
-        if (strPreviousId ==  strId)
-        {
-          nCount++;
-        }
-        else
-        {
-          nCount = 0;
-          strPreviousId = strId;
-        }
-      }
     }
     else
     {

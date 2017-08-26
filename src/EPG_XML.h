@@ -30,10 +30,9 @@
 #include "rapidxml/rapidxml.hpp"
 
 #include <json/json.h>
+#include <vector>
 
 using namespace rapidxml;
-
-//namespace EPG_XML {
 
   class EPG_XML : public EPGBase
   {
@@ -52,7 +51,5 @@ using namespace rapidxml;
     private:
       void _prepareGuide(HDHomeRunTuners::Tuner *pTuner);
       bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
-      std::map<String, Json::Value*> channelMap;
+      std::map<String, std::vector<Json::Value*>> channelMap;
   };
-//}
-

@@ -32,6 +32,7 @@
 #include "HDHomeRunTuners.h"
 #include <functional>
 #include <memory>
+#include <map>
 
 class EPGBase
 {
