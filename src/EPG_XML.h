@@ -25,31 +25,34 @@
  *
  */
 
+#ifndef EPG_XML_H
+#define EPG_XML_H
+
 #include "EPG.h"
-#include "HDHomeRunTuners.h"
 #include "rapidxml/rapidxml.hpp"
 
-#include <json/json.h>
 #include <vector>
 
 using namespace rapidxml;
 
-  class EPG_XML : public EPGBase
-  {
+class EPG_XML : public EPGBase
+{
 
-    public:
-      EPG_XML(){};
-      virtual ~EPG_XML(){};
-      virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String);
+  public:
+    EPG_XML(){};
+    virtual ~EPG_XML(){};
+    virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String);
 
-    protected:
-      bool GzipInflate(const String &compressedBytes, String &uncompressedBytes);
-      bool _xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer);
-      Json::Value& findJsonValue(Json::Value &Guide, String jsonElement, String searchData);
-      int ParseDateTime(String& strDate);
+  protected:
+    bool GzipInflate(const String &compressedBytes, String &uncompressedBytes);
+    bool _xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer);
+    Json::Value& findJsonValue(Json::Value &Guide, String jsonElement, String searchData);
+    int ParseDateTime(String& strDate);
 
-    private:
-      void _prepareGuide(HDHomeRunTuners::Tuner *pTuner);
-      bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
-      std::map<String, std::vector<Json::Value*>> channelMap;
-  };
+  private:
+    void _prepareGuide(HDHomeRunTuners::Tuner *pTuner);
+    bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
+    std::map<String, std::vector<Json::Value*>> channelMap;
+};
+
+#endif

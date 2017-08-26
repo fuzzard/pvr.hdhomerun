@@ -25,14 +25,10 @@
  *
  */
 
-
-#include "EPG.h"
 #include "EPG_SD.h"
 
 #include "client.h"
-#include "HDHomeRunTuners.h"
 #include "Utils.h"
-#include <json/json.h>
 
 using namespace ADDON;
 

@@ -17,9 +17,9 @@ include_directories(${kodiplatform_INCLUDE_DIRS}
                     ${p8-platform_INCLUDE_DIRS}
                     ${KODI_INCLUDE_DIR}
                     ${JSONCPP_INCLUDE_DIRS}
-										${ZLIB_INCLUDE_DIRS}
+                    ${ZLIB_INCLUDE_DIRS}
                     ${HDHOMERUN_INCLUDE_DIRS}
-										${PROJECT_SOURCE_DIR}/lib)
+                    ${PROJECT_SOURCE_DIR}/lib)
 
 set(DEPLIBS ${kodiplatform_LIBRARIES}
             ${p8-platform_LIBRARIES}

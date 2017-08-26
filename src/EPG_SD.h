@@ -24,8 +24,9 @@
  *  http://www.gnu.org/copyleft/gpl.html
  *
  */
+#ifndef EPG_SD_H
+#define EPG_SD_H
 
-#include "HDHomeRunTuners.h"
 #include "EPG.h"
 
 class EPG_SD : public EPGBase
@@ -44,3 +45,5 @@ class EPG_SD : public EPGBase
     bool _insert_guide_data(Json::Value &Guide, Json::Value insertdata);
 
 };
+
+#endif

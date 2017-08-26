@@ -30,9 +30,11 @@
 #define EPGBase_H
 
 #include "HDHomeRunTuners.h"
+#include "Utils.h"
+#include <json/json.h>
 #include <functional>
-#include <memory>
 #include <map>
+#include <memory>
 
 class EPGBase
 {

@@ -25,21 +25,13 @@
  *
  */
 
-#include "EPG.h"
 #include "EPG_XML.h"
-#include "HDHomeRunTuners.h"
-#include "rapidxml/rapidxml.hpp"
-#include "Utils.h"
 #include "zlib.h"
 
-#include <json/json.h>
-#include <string.h>
 #include <ctime>
-#include <vector>
 
 using namespace ADDON;
 using namespace rapidxml;
-//using namespace EPG_XML;
 
 REGISTER_CLASS("XML", EPG_XML);
 
