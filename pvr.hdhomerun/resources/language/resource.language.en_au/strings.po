@@ -52,6 +52,14 @@ msgctxt "#32103"
 msgid "Extended SiliconDust EPG"
 msgstr "Extended SiliconDust EPG"
 
+msgctxt "#32105"
+msgid "Enter XMLTV URL"
+msgstr "Enter XMLTV URL"
+
+msgctxt "#32106"
+msgid "XMLTV URL or Local File"
+msgstr "XMLTV URL or Local File"
+
 msgctxt "#32107"
 msgid "Select XMLTV file"
 msgstr "Select XMLTV file"
@@ -59,6 +67,14 @@ msgstr "Select XMLTV file"
 msgctxt "#32108"
 msgid "Extended Guide Check Interval (hrs)"
 msgstr "Extended Guide Check Interval (hrs)"
+
+msgctxt "#32110"
+msgid "URL"
+msgstr "URL"
+
+msgctxt "#32111"
+msgid "File"
+msgstr "File"
 
 msgctxt "#32121"
 msgid "SiliconDust EPG"
