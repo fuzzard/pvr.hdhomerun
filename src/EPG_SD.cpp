@@ -68,7 +68,7 @@ bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
 
 bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
-  Json::Value::ArrayIndex nIndex, nCount;
+  Json::Value::ArrayIndex nIndex;
   String strJson, strUrlExtended, strJsonExtended;
   Json::Reader jsonReader;
   bool exitExtend;
@@ -80,7 +80,7 @@ bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
   if (pTuner->Guide.type() == Json::arrayValue)
   {
     //Loop each Guide
-    for (nIndex = 0, nCount = 0; nIndex < pTuner->Guide.size(); nIndex++)
+    for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
     {
       exitExtend = false;
       Json::Value& jsonGuide = pTuner->Guide[nIndex]["Guide"];
@@ -140,7 +140,7 @@ bool EPG_SD::_insert_guide_data(Json::Value &Guide, Json::Value strInsertdata)
 
 bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
-  Json::Value::ArrayIndex nIndex, nCount;
+  Json::Value::ArrayIndex nIndex;
   String strJson;
   Json::Reader jsonReader;
 
@@ -151,7 +151,7 @@ bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
     if (jsonReader.parse(strJson, pTuner->Guide) &&
       pTuner->Guide.type() == Json::arrayValue)
     {
-      for (nIndex = 0, nCount = 0; nIndex < pTuner->Guide.size(); nIndex++)
+      for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
       {
         Json::Value& jsonGuide = pTuner->Guide[nIndex]["Guide"];
 
@@ -160,7 +160,6 @@ bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 
         EPG_SD::_addguideinfo(jsonGuide);
       }
-      KODI_LOG(LOG_DEBUG, "Found %u guide entries", nCount);
     }
     else
     {
@@ -181,9 +180,9 @@ void EPG_SD::_addguideinfo(Json::Value jsonGuide)
 
   Json::Value::ArrayIndex nCount = 0;
 
-  for (Json::Value::ArrayIndex i = 0; i < jsonGuide.size(); i++, nCount++)
+  for (nCount = 0; nCount < jsonGuide.size(); nCount++)
   {
-    Json::Value& jsonGuideItem = jsonGuide[i];
+    Json::Value& jsonGuideItem = jsonGuide[nCount];
     int iSeriesNumber = 0, iEpisodeNumber = 0;
 
     jsonGuideItem["_UID"] = g.Tuners->PvrCalculateUniqueId(jsonGuideItem["Title"].asString() + jsonGuideItem["EpisodeNumber"].asString() + jsonGuideItem["ImageURL"].asString());

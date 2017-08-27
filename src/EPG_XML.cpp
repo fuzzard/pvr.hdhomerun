@@ -181,6 +181,9 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
     if (!EPG_XML::_xmlparse(pTuner, xmlbuffer))
       return false;
   }
+
+  EPG_XML::_duplicateChannelCheck(pTuner);
+
   KODI_LOG(LOG_DEBUG, "Finished XMLTV Guide Update");
   return true;
 }
@@ -212,6 +215,31 @@ bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
     return false;
 
   return true;
+}
+
+void EPG_XML::_duplicateChannelCheck(HDHomeRunTuners::Tuner *pTuner)
+{
+  Json::Value::ArrayIndex nIndex = 0, nIndex2 = 0;
+  for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
+  {
+    Json::Value& jsonGuideName = pTuner->Guide[nIndex]["GuideName"];
+    if (pTuner->Guide[nIndex]["Guide"].size() == 0)
+    {
+      for (nIndex2 = 0; nIndex2 < pTuner->Guide.size(); nIndex2++)
+      {
+        if (nIndex2 == nIndex)
+          continue;
+        if (pTuner->Guide[nIndex2]["Guide"].size() == 0)
+          continue;
+        if (strcmp(jsonGuideName.asString().c_str(),pTuner->Guide[nIndex2]["GuideName"].asString().c_str()) == 0)
+        {
+          Json::Value& jsonGuideCurrent = pTuner->Guide[nIndex]["Guide"];
+          Json::Value jsonGuideCopy = pTuner->Guide[nIndex2]["Guide"];
+          jsonGuideCurrent = jsonGuideCopy;
+        }
+      }
+    }
+  }
 }
 
 bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> *pRootNode, const char *strElement)
@@ -304,8 +332,8 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
  */
 void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
 {
-  Json::Value::ArrayIndex nIndex, nCount;
-  for (nIndex = 0, nCount = 0; nIndex < pTuner->LineUp.size(); nIndex++)
+  Json::Value::ArrayIndex nIndex;
+  for (nIndex = 0; nIndex < pTuner->LineUp.size(); nIndex++)
   {
     pTuner->Guide[nIndex]["GuideNumber"] = pTuner->LineUp[nIndex]["GuideNumber"];
     pTuner->Guide[nIndex]["GuideName"] = pTuner->LineUp[nIndex]["GuideName"];
@@ -316,9 +344,9 @@ void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
 
 Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, String searchData)
 {
-  Json::Value::ArrayIndex nIndex, nCount;
+  Json::Value::ArrayIndex nIndex;
 
-  for (nIndex = 0, nCount = 0; nIndex < Guide.size(); nIndex++)
+  for (nIndex = 0; nIndex < Guide.size(); nIndex++)
   {
     Json::Value& jsonGuide = Guide[nIndex];
     if (strcmp(jsonGuide[jsonElement].asString().c_str(), searchData.c_str()) == 0)

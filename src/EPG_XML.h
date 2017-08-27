@@ -51,6 +51,7 @@ class EPG_XML : public EPGBase
 
   private:
     void _prepareGuide(HDHomeRunTuners::Tuner *pTuner);
+    void _duplicateChannelCheck(HDHomeRunTuners::Tuner *pTuner);
     bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
     std::map<String, std::vector<Json::Value*>> channelMap;
     int tempSeriesId = 0;
