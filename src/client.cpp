@@ -97,7 +97,7 @@ void ADDON_ReadSettings(void)
   }
   else
   {
-    g.Settings.iUpdateinterval = (int)g.Settings.iUpdateinterval * 60 * 60;
+    g.Settings.iUpdateinterval = ((int)g.Settings.iUpdateinterval + 1) * 60 * 60;
   }
 
 }

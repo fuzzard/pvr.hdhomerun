@@ -129,7 +129,7 @@ bool HDHomeRunTuners::Update(int nMode)
           }
           if (g.Settings.sXMLTV.length() > 1)
           {
-            auto epg = EPGFactory::Instance()->Create("SD");
+            auto epg = EPGFactory::Instance()->Create("XML");
             if (!epg->UpdateGuide(pTuner, g.Settings.sXMLTV))
               return false;
           }

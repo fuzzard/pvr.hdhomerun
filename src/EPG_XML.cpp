@@ -150,7 +150,7 @@ inline bool GetAttributeValue(const xml_node<Ch> * pNode, const char* strAttribu
 bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
 {
   String strXMLlocation, strXMLdata, decompressed;
-
+  KODI_LOG(LOG_DEBUG, "Starting XMLTV Guide Update: %s", xmltvlocation.c_str());
   if (pTuner->Guide.size() < 1)
   {
     EPG_XML::_prepareGuide(pTuner);
@@ -169,8 +169,8 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
       strXMLdata = decompressed;
     }
     // data starts as an expected xml file
-    // Potentially look at using another xml library to run a proper verification on the
-    // file. Not important to this development at this stage however.
+    // ToDo: Potentially look at using another xml library to run a proper verification
+    //       on the file. Not important to this development at this stage however.
     if (!(strXMLdata.substr(0,5) == "<?xml"))
     {
       KODI_LOG(LOG_DEBUG, "Invalid EPG file: %s",  xmltvlocation.c_str());
@@ -181,6 +181,7 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
     if (!EPG_XML::_xmlparse(pTuner, xmlbuffer))
       return false;
   }
+  KODI_LOG(LOG_DEBUG, "Finished XMLTV Guide Update");
   return true;
 }
 
@@ -203,9 +204,10 @@ bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
     KODI_LOG(LOG_DEBUG, "Invalid EPG XML: no <tv> tag found");
     return false;
   }
-  
+  KODI_LOG(LOG_DEBUG, "Parsing EPG XML: <channel>");
   if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "channel"))
     return false;
+  KODI_LOG(LOG_DEBUG, "Parsing EPG XML: <programme>");
   if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme"))
     return false;
 
@@ -217,12 +219,12 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
   Json::Value::ArrayIndex nCount = 0;
   xml_node<> *pChannelNode = NULL;
   String strPreviousId = "";
+  int iStartTime = 0, iEndTime = 0;
 
   for(pChannelNode = pRootNode->first_node(strElement); pChannelNode; pChannelNode = pChannelNode->next_sibling(strElement))
   {
     std::string strName, strTitle, strSynopsis;
     std::string strId, strStartTime, strEndTime;
-    int tempSeriesId = 0;
     if (strcmp(strElement, "channel") == 0)
     {
       if(!GetAttributeValue(pChannelNode, "id", strId))
@@ -234,6 +236,8 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       for(pChannelLCN = pChannelNode->first_node("LCN"); pChannelLCN; pChannelLCN = pChannelLCN->next_sibling("LCN"))
       {
         Json::Value& jsonChannel = EPG_XML::findJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
+        if (jsonChannel.isNull())
+          return false;
         Json::Value* jsonChannelPointer = &jsonChannel;
         vGuide.push_back(jsonChannelPointer);
       }
@@ -245,17 +249,23 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       //<episode-num system="xmltv_ns">4.14.</episode-num>
       if(!GetAttributeValue(pChannelNode, "channel", strId))
         continue;
+      if (strPreviousId.empty())
+      {
+        strPreviousId = strId;
+      }
       std::vector<Json::Value*> vGuide = channelMap[strId];
+      GetAttributeValue(pChannelNode, "start", strStartTime);
+      GetAttributeValue(pChannelNode, "stop", strEndTime);
+      GetNodeValue(pChannelNode, "title", strTitle);
+      GetNodeValue(pChannelNode, "desc", strSynopsis);
+      iStartTime = EPG_XML::ParseDateTime(strStartTime);
+      iEndTime = EPG_XML::ParseDateTime(strEndTime);
       for(std::vector<Json::Value*>::iterator it = vGuide.begin(); it != vGuide.end(); ++it) {
         Json::Value* jsonChannelPointer = *it;
         Json::Value& jsonChannel = *jsonChannelPointer;
 
-        GetAttributeValue(pChannelNode, "start", strStartTime);
-        GetAttributeValue(pChannelNode, "stop", strEndTime);
-        GetNodeValue(pChannelNode, "title", strTitle);
-        GetNodeValue(pChannelNode, "desc", strSynopsis);
-        jsonChannel["Guide"][nCount]["StartTime"] = EPG_XML::ParseDateTime(strStartTime);
-        jsonChannel["Guide"][nCount]["EndTime"] = EPG_XML::ParseDateTime(strEndTime);
+        jsonChannel["Guide"][nCount]["StartTime"] = iStartTime;
+        jsonChannel["Guide"][nCount]["EndTime"] = iEndTime;
         jsonChannel["Guide"][nCount]["Title"] = strTitle;
         jsonChannel["Guide"][nCount]["Synopsis"] = strSynopsis;
         jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0;
@@ -265,9 +275,19 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
         // Look at alternative for an actual series id
         // maybe other xml providers supply this as well
         tempSeriesId++;
+        // ToDo: Add filter that contains genres
+        // Look at pushing this out to EPG main class so can be used for both SD and XML
+        //jsonChannel["Guide"][nCount]["Filter"] = Json::Value(Json::arrayValue);
       }
-      // ToDo: Add filter that contains genres
-      //jsonChannel["Guide"][nCount]["Filter"] = Json::Value(Json::arrayValue);
+      if (strPreviousId ==  strId)
+      {
+        nCount++;
+      }
+      else
+      {
+        nCount = 0;
+        strPreviousId = strId;
+      }
     }
     else
     {
@@ -306,9 +326,7 @@ Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, Stri
       return jsonGuide;
     }
   }
-
-// Need to work out appropriate return type
- // return (const&)Json::Value(Json::arrayValue);
+  return jsonNull;
 }
 
 /*
