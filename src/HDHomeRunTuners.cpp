@@ -316,19 +316,26 @@ PVR_ERROR HDHomeRunTuners::PvrGetEPGForChannel(ADDON_HANDLE handle, const PVR_CH
         String
           strTitle(jsonGuideItem["Title"].asString()),
           strSynopsis(jsonGuideItem["Synopsis"].asString()),
+          strCast(jsonGuideItem["Cast"].asString()),
+          strDirector(jsonGuideItem["Director"].asString()),
+          strEpTitle(jsonGuideItem["EpisodeTitle"].asString()),
           strImageURL(jsonGuideItem["ImageURL"].asString());
 
         tag.iUniqueBroadcastId = jsonGuideItem["_UID"].asUInt();
         tag.strTitle = strTitle.c_str();
+        tag.strOriginalTitle = strEpTitle.c_str();
         tag.iUniqueChannelId = channel.iUniqueId;
         tag.startTime = (time_t)jsonGuideItem["StartTime"].asUInt();
         tag.endTime = (time_t)jsonGuideItem["EndTime"].asUInt();
         tag.firstAired = (time_t)jsonGuideItem["OriginalAirdate"].asUInt();
         tag.strPlot = strSynopsis.c_str();
+        tag.strCast = strCast.c_str();
+        tag.strDirector = strDirector.c_str();
         tag.strIconPath = strImageURL.c_str();
         tag.iSeriesNumber = jsonGuideItem["_SeriesNumber"].asInt();
         tag.iEpisodeNumber = jsonGuideItem["_EpisodeNumber"].asInt();
         tag.iGenreType = jsonGuideItem["_GenreType"].asUInt();
+        tag.iYear = jsonGuideItem["Year"].asUInt();;
 
         g.PVR->TransferEpgEntry(handle, &tag);
       }

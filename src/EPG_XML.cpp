@@ -276,46 +276,94 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
     }
     else if (strcmp(strElement, "programme") == 0)
     {
-      // ToDo: Check other xml providers to see if any other data can be mapped
-      //<episode-num system="xmltv_ns">4.14.</episode-num>
       if(!GetAttributeValue(pChannelNode, "channel", strId))
         continue;
+
+      int iYear = 0;
+      String strEpData = "", strEpName = "", strCategory = "", strActors = "", strDirectors = "", strYear = "";
+      Json::Value jsonFilter = Json::Value(Json::arrayValue);
+      xml_node<> *pProgrammeCategory = NULL, *pProgrammeActors = NULL, *pProgrammeCredits = NULL, *pProgrammeDirectors = NULL;
+
       if (strPreviousId.empty())
       {
         strPreviousId = strId;
       }
       std::vector<Json::Value*> vGuide = channelMap[strId];
-      GetAttributeValue(pChannelNode, "start", strStartTime);
-      GetAttributeValue(pChannelNode, "stop", strEndTime);
+
       GetNodeValue(pChannelNode, "title", strTitle);
       GetNodeValue(pChannelNode, "desc", strSynopsis);
+      GetNodeValue(pChannelNode, "episode-num", strEpData);
+      GetNodeValue(pChannelNode, "sub-title", strEpName);
+      GetAttributeValue(pChannelNode, "start", strStartTime);
+      GetAttributeValue(pChannelNode, "stop", strEndTime);
       iStartTime = EPG_XML::ParseDateTime(strStartTime);
       iEndTime = EPG_XML::ParseDateTime(strEndTime);
 
-      xml_node<> *pProgrammeCategory = NULL;
-      Json::Value jsonFilter = Json::Value(Json::arrayValue);
-      Json::Value::ArrayIndex nCountCategory = 0;
-      String strCategory = "";
-      for(pProgrammeCategory = pChannelNode->first_node("category"); pProgrammeCategory; pProgrammeCategory = pProgrammeCategory->next_sibling("category"))
+      if(pChannelNode->first_node("date"))
       {
-        strCategory = pProgrammeCategory->value();
-        jsonFilter.append(strCategory);
+        GetNodeValue(pChannelNode, "date", strYear);
+        iYear = std::stoi(strYear);
       }
+
+      if(pChannelNode->first_node("category"))
+      {
+        for(pProgrammeCategory = pChannelNode->first_node("category"); pProgrammeCategory; pProgrammeCategory = pProgrammeCategory->next_sibling("category"))
+        {
+          strCategory = pProgrammeCategory->value();
+          jsonFilter.append(strCategory);
+        }
+      }
+      if(pChannelNode->first_node("credits"))
+      {
+        pProgrammeCredits = pChannelNode->first_node("credits");
+        for(pProgrammeActors = pProgrammeCredits->first_node("actor"); pProgrammeActors; pProgrammeActors = pProgrammeActors->next_sibling("actor"))
+        {
+          if (strActors.empty())
+          {
+            strActors = strActors + pProgrammeActors->value();
+          }
+          else
+          {
+            strActors = strActors + ", " + pProgrammeActors->value();
+          }
+        }
+        for(pProgrammeDirectors = pChannelNode->first_node("credits")->first_node("director"); pProgrammeDirectors; pProgrammeDirectors = pProgrammeDirectors->next_sibling("director"))
+        {
+          if (strDirectors.empty())
+          {
+            strDirectors = strDirectors + pProgrammeDirectors->value();
+          }
+          else
+          {
+            strDirectors = strDirectors + ", " + pProgrammeDirectors->value();
+          }
+        }
+      }
+
       for(std::vector<Json::Value*>::iterator it = vGuide.begin(); it != vGuide.end(); ++it) {
         Json::Value* jsonChannelPointer = *it;
         Json::Value& jsonChannel = *jsonChannelPointer;
-        // ToDo: Episode/Series Number
-        //       imageurl
-        //       originalairdate
+        // ToDo: imageurl
         //       SeriesID
+
         jsonChannel["Guide"][nCount]["StartTime"] = iStartTime;
         jsonChannel["Guide"][nCount]["EndTime"] = iEndTime;
         jsonChannel["Guide"][nCount]["Title"] = strTitle;
+        if (!strEpName.empty())
+          jsonChannel["Guide"][nCount]["EpisodeTitle"] = strEpName;
+        if (!strEpData.empty())
+          jsonChannel["Guide"][nCount]["EpisodeNumber"] = strEpData;
         jsonChannel["Guide"][nCount]["Synopsis"] = strSynopsis;
-        jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0;
-        jsonChannel["Guide"][nCount]["ImageURL"] = "";
-        jsonChannel["Guide"][nCount]["SeriesID"] = tempSeriesId;
+        jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0; // not implemented
+        jsonChannel["Guide"][nCount]["ImageURL"] = "";  // not implemented
+        jsonChannel["Guide"][nCount]["SeriesID"] = tempSeriesId; // not implemented
         jsonChannel["Guide"][nCount]["Filter"] = jsonFilter;
+        if (!(iYear == 0))
+          jsonChannel["Guide"][nCount]["Year"] = iYear;
+        if (!strActors.empty())
+          jsonChannel["Guide"][nCount]["Cast"] = strActors;
+        if (!strDirectors.empty())
+          jsonChannel["Guide"][nCount]["Director"] = strDirectors;
         // Look at alternative for an actual series id
         // maybe other xml providers supply this as well
         tempSeriesId++;

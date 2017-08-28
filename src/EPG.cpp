@@ -117,7 +117,8 @@ void EPGBase::addguideinfo(Json::Value& jsonGuide)
     }
     jsonGuideItem["_GenreType"] = nGenreType;
 
-    if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "S%dE%d", &iSeriesNumber, &iEpisodeNumber) != 2)
+    if ((sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "S%dE%d", &iSeriesNumber, &iEpisodeNumber) != 2) ||
+      (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "%d.%d.", &iSeriesNumber, &iEpisodeNumber) != 2))
       if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "EP%d", &iEpisodeNumber) == 1)
         iSeriesNumber = 0;
 
