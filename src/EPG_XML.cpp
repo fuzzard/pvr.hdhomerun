@@ -150,6 +150,7 @@ inline bool GetAttributeValue(const xml_node<Ch> * pNode, const char* strAttribu
 bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
 {
   String strXMLlocation, strXMLdata, decompressed;
+  Json::Value::ArrayIndex nIndex;
   KODI_LOG(LOG_DEBUG, "Starting XMLTV Guide Update: %s", xmltvlocation.c_str());
   if (pTuner->Guide.size() < 1)
   {
@@ -183,6 +184,8 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
   }
 
   EPG_XML::_duplicateChannelCheck(pTuner);
+  for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
+    EPGBase::addguideinfo(pTuner->Guide[nIndex]["Guide"]);
 
   KODI_LOG(LOG_DEBUG, "Finished XMLTV Guide Update");
   return true;
@@ -288,10 +291,23 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       GetNodeValue(pChannelNode, "desc", strSynopsis);
       iStartTime = EPG_XML::ParseDateTime(strStartTime);
       iEndTime = EPG_XML::ParseDateTime(strEndTime);
+
+      xml_node<> *pProgrammeCategory = NULL;
+      Json::Value jsonFilter = Json::Value(Json::arrayValue);
+      Json::Value::ArrayIndex nCountCategory = 0;
+      String strCategory = "";
+      for(pProgrammeCategory = pChannelNode->first_node("category"); pProgrammeCategory; pProgrammeCategory = pProgrammeCategory->next_sibling("category"))
+      {
+        strCategory = pProgrammeCategory->value();
+        jsonFilter.append(strCategory);
+      }
       for(std::vector<Json::Value*>::iterator it = vGuide.begin(); it != vGuide.end(); ++it) {
         Json::Value* jsonChannelPointer = *it;
         Json::Value& jsonChannel = *jsonChannelPointer;
-
+        // ToDo: Episode/Series Number
+        //       imageurl
+        //       originalairdate
+        //       SeriesID
         jsonChannel["Guide"][nCount]["StartTime"] = iStartTime;
         jsonChannel["Guide"][nCount]["EndTime"] = iEndTime;
         jsonChannel["Guide"][nCount]["Title"] = strTitle;
@@ -299,13 +315,10 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
         jsonChannel["Guide"][nCount]["OriginalAirdate"] = 0;
         jsonChannel["Guide"][nCount]["ImageURL"] = "";
         jsonChannel["Guide"][nCount]["SeriesID"] = tempSeriesId;
-
+        jsonChannel["Guide"][nCount]["Filter"] = jsonFilter;
         // Look at alternative for an actual series id
         // maybe other xml providers supply this as well
         tempSeriesId++;
-        // ToDo: Add filter that contains genres
-        // Look at pushing this out to EPG main class so can be used for both SD and XML
-        //jsonChannel["Guide"][nCount]["Filter"] = Json::Value(Json::arrayValue);
       }
       if (strPreviousId ==  strId)
       {

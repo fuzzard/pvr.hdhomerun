@@ -40,6 +40,9 @@ class EPGBase
 {
   public:
     virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String) = 0;
+
+  protected:
+    void addguideinfo(Json::Value& jsonGuide);
 };
 
 /*

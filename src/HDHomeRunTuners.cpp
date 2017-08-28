@@ -117,7 +117,7 @@ bool HDHomeRunTuners::Update(int nMode)
         }
         case 1:
         {
-          KODI_LOG(LOG_DEBUG, "Using XMLTV Local");
+          KODI_LOG(LOG_DEBUG, "Using XMLTV: %s", g.Settings.sXMLTV.c_str());
           // if lineup not set do a pull from lineup.json
           if (pTuner->LineUp.size() < 1)
           {

@@ -69,3 +69,59 @@ std::shared_ptr<EPGBase> EPGFactory::Create(String name)
   else
     return nullptr;
 }
+
+void EPGBase::addguideinfo(Json::Value& jsonGuide)
+{
+  Json::Value::ArrayIndex nCount = 0;
+
+  for (nCount = 0; nCount < jsonGuide.size(); nCount++)
+  {
+    Json::Value& jsonGuideItem = jsonGuide[nCount];
+    int iSeriesNumber = 0, iEpisodeNumber = 0;
+
+    jsonGuideItem["_UID"] = g.Tuners->PvrCalculateUniqueId(jsonGuideItem["Title"].asString() + jsonGuideItem["EpisodeNumber"].asString() + jsonGuideItem["ImageURL"].asString());
+
+    if (g.Settings.bMarkNew &&
+      jsonGuideItem["OriginalAirdate"].asUInt() != 0 &&
+        jsonGuideItem["OriginalAirdate"].asUInt() + 48*60*60 > jsonGuideItem["StartTime"].asUInt())
+      jsonGuideItem["Title"] = "*" + jsonGuideItem["Title"].asString();
+
+    unsigned int nGenreType = 0;
+    Json::Value& jsonFilter = jsonGuideItem["Filter"];
+    for (Json::Value::ArrayIndex nGenreIndex = 0; nGenreIndex < jsonFilter.size(); nGenreIndex++)
+    {
+      String str = jsonFilter[nGenreIndex].asString();
+
+      if (str == "News")
+        nGenreType = EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS;
+      else
+      if (str == "Comedy")
+        nGenreType = EPG_EVENT_CONTENTMASK_SHOW;
+      else
+      if (str == "Movie" ||
+        str == "Drama")
+        nGenreType = EPG_EVENT_CONTENTMASK_MOVIEDRAMA;
+      else
+      if (str == "Food")
+        nGenreType = EPG_EVENT_CONTENTMASK_LEISUREHOBBIES;
+      else
+      if (str == "Talk Show")
+        nGenreType = EPG_EVENT_CONTENTMASK_SHOW;
+      else
+      if (str == "Game Show")
+        nGenreType = EPG_EVENT_CONTENTMASK_SHOW;
+      else
+      if (str == "Sport" ||
+        str == "Sports")
+        nGenreType = EPG_EVENT_CONTENTMASK_SPORTS;
+    }
+    jsonGuideItem["_GenreType"] = nGenreType;
+
+    if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "S%dE%d", &iSeriesNumber, &iEpisodeNumber) != 2)
+      if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "EP%d", &iEpisodeNumber) == 1)
+        iSeriesNumber = 0;
+
+    jsonGuideItem["_SeriesNumber"] = iSeriesNumber;
+    jsonGuideItem["_EpisodeNumber"] = iEpisodeNumber;
+  }
+}

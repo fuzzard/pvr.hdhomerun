@@ -105,7 +105,7 @@ bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
         }
       } while (!exitExtend);
       KODI_LOG(LOG_DEBUG, "Guide Complete for Channel: %s", pTuner->Guide[nIndex]["GuideNumber"].asString().c_str());
-      EPG_SD::_addguideinfo(jsonGuide);
+      EPGBase::addguideinfo(jsonGuide);
     }
   } 
   return true;
@@ -128,9 +128,8 @@ unsigned long long EPG_SD::_getEndTime(Json::Value jsonGuide)
 bool EPG_SD::_insert_guide_data(Json::Value &Guide, Json::Value strInsertdata)
 {
   Json::Value::ArrayIndex i = 0;
-  Json::Value::ArrayIndex nCount = 0;
 
-  for (Json::Value::ArrayIndex j = 0; j < strInsertdata[i]["Guide"].size(); j++, nCount++)
+  for (Json::Value::ArrayIndex j = 0; j < strInsertdata[i]["Guide"].size(); j++)
   {
     Guide.append(strInsertdata[i]["Guide"][j]);
   }
@@ -158,7 +157,7 @@ bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
         if (jsonGuide.type() != Json::arrayValue)
           continue;
 
-        EPG_SD::_addguideinfo(jsonGuide);
+        EPGBase::addguideinfo(jsonGuide);
       }
     }
     else
@@ -172,62 +171,4 @@ bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
     return false;
   }
   return true;
-}
-
-
-void EPG_SD::_addguideinfo(Json::Value jsonGuide)
-{
-
-  Json::Value::ArrayIndex nCount = 0;
-
-  for (nCount = 0; nCount < jsonGuide.size(); nCount++)
-  {
-    Json::Value& jsonGuideItem = jsonGuide[nCount];
-    int iSeriesNumber = 0, iEpisodeNumber = 0;
-
-    jsonGuideItem["_UID"] = g.Tuners->PvrCalculateUniqueId(jsonGuideItem["Title"].asString() + jsonGuideItem["EpisodeNumber"].asString() + jsonGuideItem["ImageURL"].asString());
-
-    if (g.Settings.bMarkNew &&
-      jsonGuideItem["OriginalAirdate"].asUInt() != 0 &&
-        jsonGuideItem["OriginalAirdate"].asUInt() + 48*60*60 > jsonGuideItem["StartTime"].asUInt())
-      jsonGuideItem["Title"] = "*" + jsonGuideItem["Title"].asString();
-
-    unsigned int nGenreType = 0;
-    Json::Value& jsonFilter = jsonGuideItem["Filter"];
-    for (Json::Value::ArrayIndex nGenreIndex = 0; nGenreIndex < jsonFilter.size(); nGenreIndex++)
-    {
-      String str = jsonFilter[nGenreIndex].asString();
-
-      if (str == "News")
-        nGenreType = EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS;
-      else
-      if (str == "Comedy")
-        nGenreType = EPG_EVENT_CONTENTMASK_SHOW;
-      else
-      if (str == "Movie" ||
-        str == "Drama")
-        nGenreType = EPG_EVENT_CONTENTMASK_MOVIEDRAMA;
-      else
-      if (str == "Food")
-        nGenreType = EPG_EVENT_CONTENTMASK_LEISUREHOBBIES;
-      else
-      if (str == "Talk Show")
-        nGenreType = EPG_EVENT_CONTENTMASK_SHOW;
-      else
-      if (str == "Game Show")
-        nGenreType = EPG_EVENT_CONTENTMASK_SHOW;
-      else
-      if (str == "Sport" ||
-        str == "Sports")
-        nGenreType = EPG_EVENT_CONTENTMASK_SPORTS;
-    }
-    jsonGuideItem["_GenreType"] = nGenreType;
-
-    if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "S%dE%d", &iSeriesNumber, &iEpisodeNumber) != 2)
-      if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "EP%d", &iEpisodeNumber) == 1)
-        iSeriesNumber = 0;
-
-    jsonGuideItem["_SeriesNumber"] = iSeriesNumber;
-    jsonGuideItem["_EpisodeNumber"] = iEpisodeNumber;
-  }
 }

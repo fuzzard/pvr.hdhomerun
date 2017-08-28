@@ -82,9 +82,9 @@ void ADDON_ReadSettings(void)
     g.Settings.bDebug = false;
 
   if (!g.XBMC->GetSetting("epg_type", &g.Settings.iEPG))
-    g.XBMC->GetSetting("epg_type", &g.Settings.iEPG);
+    g.Settings.iEPG = 0;
 
-  if (g.Settings.iEPG == 1)
+  if (g.Settings.iEPG == 0)
   {
     if (!g.XBMC->GetSetting("sd_extended", &g.Settings.bSD_EPGAdvanced))
       g.Settings.bSD_EPGAdvanced = false;
@@ -98,7 +98,7 @@ void ADDON_ReadSettings(void)
       g.Settings.iUpdateinterval = ((int)g.Settings.iUpdateinterval + 1) * 60 * 60;
     }
   }
-  else if (g.Settings.iEPG == 0)
+  else if (g.Settings.iEPG == 1)
   {
     if (!g.XBMC->GetSetting("xmltv_type", &g.Settings.iXML_Type))
       g.Settings.iXML_Type = 1;

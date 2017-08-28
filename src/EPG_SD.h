@@ -40,7 +40,6 @@ class EPG_SD : public EPGBase
   private:
     bool _UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
     bool _UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
-    void _addguideinfo(Json::Value jsonGuide);
     unsigned long long _getEndTime(Json::Value jsonGuide);
     bool _insert_guide_data(Json::Value &Guide, Json::Value insertdata);
 
