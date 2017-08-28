@@ -117,11 +117,21 @@ void EPGBase::addguideinfo(Json::Value& jsonGuide)
     }
     jsonGuideItem["_GenreType"] = nGenreType;
 
-    if ((sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "S%dE%d", &iSeriesNumber, &iEpisodeNumber) != 2) ||
-      (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "%d.%d.", &iSeriesNumber, &iEpisodeNumber) != 2))
-      if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "EP%d", &iEpisodeNumber) == 1)
-        iSeriesNumber = 0;
-
+    if (jsonGuideItem.isMember("EpisodeNumber"))
+    {
+      if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "S%dE%d", &iSeriesNumber, &iEpisodeNumber) != 2)
+        if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "EP%d", &iEpisodeNumber) == 1)
+          iSeriesNumber = 0;
+      // xmltv episode-num format starts at 0 with format x.y.z
+      // x = Season numbering starting at 0 (ie season 1 = 0
+      // y = Episode
+      // z = part number (eg part 1 of 2) disregard this at this stage
+      if (sscanf(jsonGuideItem["EpisodeNumber"].asString().c_str(), "%d.%d.", &iSeriesNumber, &iEpisodeNumber) == 2)
+      {
+        iSeriesNumber++;
+        iEpisodeNumber++;
+      }
+    }
     jsonGuideItem["_SeriesNumber"] = iSeriesNumber;
     jsonGuideItem["_EpisodeNumber"] = iEpisodeNumber;
   }

@@ -280,7 +280,7 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
         continue;
 
       int iYear = 0;
-      String strEpData = "", strEpName = "", strCategory = "", strActors = "", strDirectors = "", strYear = "";
+      String strEpData = "", strEpName = "", strCategory = "", strActors = "", strDirectors = "", strYear = "", strEpNumSystem = "";
       Json::Value jsonFilter = Json::Value(Json::arrayValue);
       xml_node<> *pProgrammeCategory = NULL, *pProgrammeActors = NULL, *pProgrammeCredits = NULL, *pProgrammeDirectors = NULL;
 
@@ -290,15 +290,19 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       }
       std::vector<Json::Value*> vGuide = channelMap[strId];
 
-      GetNodeValue(pChannelNode, "title", strTitle);
-      GetNodeValue(pChannelNode, "desc", strSynopsis);
-      GetNodeValue(pChannelNode, "episode-num", strEpData);
-      GetNodeValue(pChannelNode, "sub-title", strEpName);
       GetAttributeValue(pChannelNode, "start", strStartTime);
       GetAttributeValue(pChannelNode, "stop", strEndTime);
       iStartTime = EPG_XML::ParseDateTime(strStartTime);
       iEndTime = EPG_XML::ParseDateTime(strEndTime);
-
+      GetNodeValue(pChannelNode, "title", strTitle);
+      GetNodeValue(pChannelNode, "desc", strSynopsis);
+      if(pChannelNode->first_node("episode-num"))
+        // only support xmltv_ns numbering scheme at this stage
+        GetAttributeValue(pChannelNode->first_node("episode-num"), "system", strEpNumSystem);
+        if (strcmp(strEpNumSystem.c_str(), "xmltv_ns") == 0)
+          GetNodeValue(pChannelNode, "episode-num", strEpData);
+      if(pChannelNode->first_node("sub-title"))
+        GetNodeValue(pChannelNode, "sub-title", strEpName);
       if(pChannelNode->first_node("date"))
       {
         GetNodeValue(pChannelNode, "date", strYear);
