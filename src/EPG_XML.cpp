@@ -26,21 +26,22 @@
  */
 
 #include "EPG_XML.h"
-#include "zlib.h"
 
 #include <ctime>
+
+#include "zlib.h"
 
 using namespace ADDON;
 using namespace rapidxml;
 
-REGISTER_CLASS("XML", EPG_XML);
+REGISTER_CLASS("XML", CEpg_Xml);
 
 /*
  * This method uses zlib to decompress a gzipped file in memory.
  * Author: Andrew Lim Chong Liang
  * http://windrealm.org
  */
-bool EPG_XML::GzipInflate(const String &compressedBytes, String &uncompressedBytes)
+bool CEpg_Xml::GzipInflate(const String &compressedBytes, String &uncompressedBytes)
 {
 
   #define HANDLE_CALL_ZLIB(status) {   \
@@ -147,14 +148,14 @@ inline bool GetAttributeValue(const xml_node<Ch> * pNode, const char* strAttribu
  *  Parses xmltv formated file and populates pTuner->Guide with data.
  *
  */
-bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
+bool CEpg_Xml::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
 {
   String strXMLlocation, strXMLdata, decompressed;
   Json::Value::ArrayIndex nIndex;
   KODI_LOG(LOG_DEBUG, "Starting XMLTV Guide Update: %s", xmltvlocation.c_str());
   if (pTuner->Guide.size() < 1)
   {
-    EPG_XML::_prepareGuide(pTuner);
+    CEpg_Xml::PrepareGuide(pTuner);
   }
 
   if (GetFileContents(xmltvlocation, strXMLdata))
@@ -162,7 +163,7 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
     // gzip packed
     if (strXMLdata.substr(0,3) == "\x1F\x8B\x08")
     {
-      if (!EPG_XML::GzipInflate(strXMLdata, decompressed))
+      if (!CEpg_Xml::GzipInflate(strXMLdata, decompressed))
       {
         KODI_LOG(LOG_DEBUG, "Invalid EPG file '%s': unable to decompress file.", xmltvlocation.c_str());
         return false;
@@ -179,22 +180,22 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
     }
     char *xmlbuffer = new char[strXMLdata.size() + 1];
     strcpy(xmlbuffer, strXMLdata.c_str());
-    if (!EPG_XML::_xmlparse(pTuner, xmlbuffer))
+    if (!CEpg_Xml::XmlParse(pTuner, xmlbuffer))
       return false;
   }
 
   if (g.Settings.bXML_icons)
-    EPG_XML::_useSDicons(pTuner);
+    CEpg_Xml::UseSDIcons(pTuner);
 
-  EPG_XML::_duplicateChannelCheck(pTuner);
+  CEpg_Xml::DuplicateChannelCheck(pTuner);
   for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
-    EPGBase::addguideinfo(pTuner->Guide[nIndex]["Guide"]);
+    CEpgBase::AddGuideInfo(pTuner->Guide[nIndex]["Guide"]);
 
   KODI_LOG(LOG_DEBUG, "Finished XMLTV Guide Update");
   return true;
 }
 
-bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
+bool CEpg_Xml::XmlParse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
 {
   xml_document<> xmlDoc;
   try
@@ -214,23 +215,23 @@ bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
     return false;
   }
   KODI_LOG(LOG_DEBUG, "Parsing EPG XML: <channel>");
-  if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "channel"))
+  if (!CEpg_Xml::XmlParseElement(pTuner, pRootElement, "channel"))
     return false;
   KODI_LOG(LOG_DEBUG, "Parsing EPG XML: <programme>");
-  if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme"))
+  if (!CEpg_Xml::XmlParseElement(pTuner, pRootElement, "programme"))
     return false;
 
   return true;
 }
 
-bool EPG_XML::_useSDicons(HDHomeRunTuners::Tuner *pTuner)
+bool CEpg_Xml::UseSDIcons(HDHomeRunTuners::Tuner *pTuner)
 {
   String strUrl, strJson;
   Json::Value::ArrayIndex nIndex, nIndex2;
   Json::Reader jsonReader;
   Json::Value jsonIconGuide;
 
-  strUrl = StringUtils::Format(EPGBase::SD_GuideURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
+  strUrl = StringUtils::Format(CEpgBase::SD_GUIDEURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
 
   if (GetFileContents(strUrl.c_str(), strJson))
   {
@@ -263,7 +264,7 @@ bool EPG_XML::_useSDicons(HDHomeRunTuners::Tuner *pTuner)
   return true;
 }
 
-void EPG_XML::_duplicateChannelCheck(HDHomeRunTuners::Tuner *pTuner)
+void CEpg_Xml::DuplicateChannelCheck(HDHomeRunTuners::Tuner *pTuner)
 {
   Json::Value::ArrayIndex nIndex = 0, nIndex2 = 0;
   for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
@@ -288,7 +289,7 @@ void EPG_XML::_duplicateChannelCheck(HDHomeRunTuners::Tuner *pTuner)
   }
 }
 
-bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> *pRootNode, const char *strElement)
+bool CEpg_Xml::XmlParseElement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> *pRootNode, const char *strElement)
 {
   Json::Value::ArrayIndex nCount = 0;
   xml_node<> *pChannelNode = NULL;
@@ -309,7 +310,7 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       std::vector<Json::Value*> vGuide;
       for(pChannelLCN = pChannelNode->first_node("LCN"); pChannelLCN; pChannelLCN = pChannelLCN->next_sibling("LCN"))
       {
-        Json::Value& jsonChannel = EPG_XML::findJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
+        Json::Value& jsonChannel = CEpg_Xml::FindJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
         if (jsonChannel.isNull())
           return false;
         Json::Value* jsonChannelPointer = &jsonChannel;
@@ -335,15 +336,17 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
 
       GetAttributeValue(pChannelNode, "start", strStartTime);
       GetAttributeValue(pChannelNode, "stop", strEndTime);
-      iStartTime = EPG_XML::ParseDateTime(strStartTime);
-      iEndTime = EPG_XML::ParseDateTime(strEndTime);
+      iStartTime = CEpg_Xml::ParseDateTime(strStartTime);
+      iEndTime = CEpg_Xml::ParseDateTime(strEndTime);
       GetNodeValue(pChannelNode, "title", strTitle);
       GetNodeValue(pChannelNode, "desc", strSynopsis);
       if(pChannelNode->first_node("episode-num"))
+      {
         // only support xmltv_ns numbering scheme at this stage
         GetAttributeValue(pChannelNode->first_node("episode-num"), "system", strEpNumSystem);
         if (strcmp(strEpNumSystem.c_str(), "xmltv_ns") == 0)
           GetNodeValue(pChannelNode, "episode-num", strEpData);
+      }
       if(pChannelNode->first_node("sub-title"))
         GetNodeValue(pChannelNode, "sub-title", strEpName);
       if(pChannelNode->first_node("date"))
@@ -438,7 +441,7 @@ bool EPG_XML::_xmlparseelement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
  *  Create basic layout of Guide json for each channel listed by LineUp
  *
  */
-void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
+void CEpg_Xml::PrepareGuide(HDHomeRunTuners::Tuner *pTuner)
 {
   Json::Value::ArrayIndex nIndex;
   for (nIndex = 0; nIndex < pTuner->LineUp.size(); nIndex++)
@@ -450,7 +453,7 @@ void EPG_XML::_prepareGuide(HDHomeRunTuners::Tuner *pTuner)
   }
 }
 
-Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, String searchData)
+Json::Value& CEpg_Xml::FindJsonValue(Json::Value &Guide, String jsonElement, String searchData)
 {
   Json::Value::ArrayIndex nIndex;
 
@@ -472,7 +475,7 @@ Json::Value& EPG_XML::findJsonValue(Json::Value &Guide, String jsonElement, Stri
  * Original: http://github.com/afedchin/xbmc-addon-iptvsimple/
  */
 
-int EPG_XML::ParseDateTime(std::string& strDate)
+int CEpg_Xml::ParseDateTime(std::string& strDate)
 {
   struct tm timeinfo;
   memset(&timeinfo, 0, sizeof(tm));

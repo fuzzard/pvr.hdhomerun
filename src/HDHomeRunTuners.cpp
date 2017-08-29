@@ -22,12 +22,14 @@
  *
  */
 
-#include "client.h"
-#include "Utils.h"
 #include "HDHomeRunTuners.h"
-#include "EPG.h"
-#include <set>
+
 #include <functional>
+#include <set>
+
+#include "client.h"
+#include "EPG.h"
+#include "Utils.h"
 
 using namespace ADDON;
 
@@ -101,7 +103,7 @@ bool HDHomeRunTuners::Update(int nMode)
         case 0:
         {
           KODI_LOG(LOG_DEBUG, "Using SiliconDust EPG");
-          auto epg = EPGFactory::Instance()->Create("SD");
+          auto epg = CEpgFactory::Instance()->Create("SD");
           if (g.Settings.bSD_EPGAdvanced)
           {
             if (!epg->UpdateGuide(pTuner, "AG"))
@@ -129,7 +131,7 @@ bool HDHomeRunTuners::Update(int nMode)
           }
           if (g.Settings.sXMLTV.length() > 1)
           {
-            auto epg = EPGFactory::Instance()->Create("XML");
+            auto epg = CEpgFactory::Instance()->Create("XML");
             if (!epg->UpdateGuide(pTuner, g.Settings.sXMLTV))
               return false;
           }

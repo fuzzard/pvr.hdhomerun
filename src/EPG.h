@@ -26,24 +26,26 @@
  */
 
 //#include "EPGBase.h"
-#ifndef EPGBase_H
-#define EPGBase_H
+#ifndef EPG_H
+#define EPG_H
 
-#include "HDHomeRunTuners.h"
-#include "Utils.h"
-#include <json/json.h>
 #include <functional>
+#include <json/json.h>
 #include <map>
 #include <memory>
 
-class EPGBase
+#include "HDHomeRunTuners.h"
+#include "Utils.h"
+
+
+class CEpgBase
 {
   public:
     virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String) = 0;
 
   protected:
-    void addguideinfo(Json::Value& jsonGuide);
-    static const String SD_GuideURL;
+    void AddGuideInfo(Json::Value&);
+    static const String SD_GUIDEURL;
 };
 
 /*
@@ -53,29 +55,29 @@ class EPGBase
  */
 
 // A helper class to register a factory function
-class Registrar {
+class CRegistrar {
 public:
-    Registrar(String className, std::function<EPGBase*(void)> classFactoryFunction);
+    CRegistrar(String className, std::function<CEpgBase*(void)> classFactoryFunction);
 };
 
 // A preprocessor define used by derived classes
-#define REGISTER_CLASS(NAME, TYPE) static Registrar registrar(NAME, [](void) -> EPGBase * { return new TYPE();});
+#define REGISTER_CLASS(NAME, TYPE) static CRegistrar registrar(NAME, [](void) -> CEpgBase * { return new TYPE();});
 
 // The factory - implements singleton pattern!
-class EPGFactory
+class CEpgFactory
 {
 public:
     // Get the single instance of the factory
-    static EPGFactory * Instance();
+    static CEpgFactory * Instance();
     // register a factory function to create an instance of className
-    void RegisterFactoryFunction(String name, std::function<EPGBase*(void)> classFactoryFunction);
+    void RegisterFactoryFunction(String name, std::function<CEpgBase*(void)> classFactoryFunction);
     // create an instance of a registered class
-    std::shared_ptr<EPGBase> Create(String name);
+    std::shared_ptr<CEpgBase> Create(String name);
 
 private:
-    EPGFactory(){}
+    CEpgFactory(){}
     // the registry of factory functions
-    std::map<String, std::function<EPGBase*(void)>> factoryFunctionRegistry;
+    std::map<String, std::function<CEpgBase*(void)>> factoryFunctionRegistry;
 
 };
 

@@ -32,25 +32,25 @@
 
 using namespace ADDON;
 
-REGISTER_CLASS("SD", EPG_SD);
+REGISTER_CLASS("SD", CEpg_SD);
 
-bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
+bool CEpg_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
 {
   String strUrl;
 
-  strUrl = StringUtils::Format(EPGBase::SD_GuideURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
+  strUrl = StringUtils::Format(CEpgBase::SD_GUIDEURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
 
   if (advancedguide == "AG")
   {
   // No guide Exists, so pull basic guide data to populate epg guide initially
     if (pTuner->Guide.size() < 1)
     {
-      EPG_SD::_UpdateBasicGuide(pTuner, strUrl);
+      CEpg_SD::UpdateBasicGuide(pTuner, strUrl);
       return true;
     }
     else
     {
-      if (EPG_SD::_UpdateAdvancedGuide(pTuner, strUrl))
+      if (CEpg_SD::UpdateAdvancedGuide(pTuner, strUrl))
       {
         return true;
       }
@@ -58,7 +58,7 @@ bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
   }
   else
   {
-    if (EPG_SD::_UpdateBasicGuide(pTuner, strUrl))
+    if (CEpg_SD::UpdateBasicGuide(pTuner, strUrl))
     {
       return true;
     }
@@ -66,7 +66,7 @@ bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
   return false;
 }
 
-bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
+bool CEpg_SD::UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
   Json::Value::ArrayIndex nIndex;
   String strJson, strUrlExtended, strJsonExtended;
@@ -84,7 +84,7 @@ bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
     {
       exitExtend = false;
       Json::Value& jsonGuide = pTuner->Guide[nIndex]["Guide"];
-      endTime = EPG_SD::_getEndTime(jsonGuide);
+      endTime = CEpg_SD::GetEndTime(jsonGuide);
 
       do 
       {
@@ -99,19 +99,19 @@ bool EPG_SD::_UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
           if (jsonReader.parse(strJsonExtended, tempGuide) &&
             tempGuide.type() == Json::arrayValue)
           {
-            EPG_SD::_insert_guide_data(pTuner->Guide[nIndex]["Guide"], tempGuide);
-            endTime = EPG_SD::_getEndTime(pTuner->Guide[nIndex]["Guide"]);
+            CEpg_SD::InsertGuideData(pTuner->Guide[nIndex]["Guide"], tempGuide);
+            endTime = CEpg_SD::GetEndTime(pTuner->Guide[nIndex]["Guide"]);
           }
         }
       } while (!exitExtend);
       KODI_LOG(LOG_DEBUG, "Guide Complete for Channel: %s", pTuner->Guide[nIndex]["GuideNumber"].asString().c_str());
-      EPGBase::addguideinfo(jsonGuide);
+      CEpgBase::AddGuideInfo(jsonGuide);
     }
   } 
   return true;
 }
 
-unsigned long long EPG_SD::_getEndTime(Json::Value jsonGuide)
+unsigned long long CEpg_SD::GetEndTime(Json::Value jsonGuide)
 {
   Json::Value& jsonGuideItem = jsonGuide[jsonGuide.size() - 1];
   if (jsonGuideItem["EndTime"].asUInt() > 0)
@@ -125,7 +125,7 @@ unsigned long long EPG_SD::_getEndTime(Json::Value jsonGuide)
 }
 
 
-bool EPG_SD::_insert_guide_data(Json::Value &Guide, Json::Value strInsertdata)
+bool CEpg_SD::InsertGuideData(Json::Value &Guide, Json::Value strInsertdata)
 {
   Json::Value::ArrayIndex i = 0;
 
@@ -137,7 +137,7 @@ bool EPG_SD::_insert_guide_data(Json::Value &Guide, Json::Value strInsertdata)
   return true;
 }
 
-bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
+bool CEpg_SD::UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
   Json::Value::ArrayIndex nIndex;
   String strJson;
@@ -157,7 +157,7 @@ bool EPG_SD::_UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
         if (jsonGuide.type() != Json::arrayValue)
           continue;
 
-        EPGBase::addguideinfo(jsonGuide);
+        CEpgBase::AddGuideInfo(jsonGuide);
       }
     }
     else

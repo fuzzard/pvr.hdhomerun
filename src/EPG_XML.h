@@ -29,31 +29,32 @@
 #define EPG_XML_H
 
 #include "EPG.h"
-#include "rapidxml/rapidxml.hpp"
 
 #include <vector>
 
+#include "rapidxml/rapidxml.hpp"
+
 using namespace rapidxml;
 
-class EPG_XML : public EPGBase
+class CEpg_Xml : public CEpgBase
 {
 
   public:
-    EPG_XML(){};
-    virtual ~EPG_XML(){};
+    CEpg_Xml(){};
+    virtual ~CEpg_Xml(){};
     virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String);
 
   protected:
-    bool GzipInflate(const String &compressedBytes, String &uncompressedBytes);
-    bool _xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer);
-    Json::Value& findJsonValue(Json::Value &Guide, String jsonElement, String searchData);
-    int ParseDateTime(String& strDate);
+    Json::Value& FindJsonValue(Json::Value&, String, String);
+    bool GzipInflate(const String&, String&);
+    int ParseDateTime(String&);
+    bool XmlParse(HDHomeRunTuners::Tuner*, char*);
 
   private:
-    void _prepareGuide(HDHomeRunTuners::Tuner *pTuner);
-    void _duplicateChannelCheck(HDHomeRunTuners::Tuner *pTuner);
-    bool _xmlparseelement(HDHomeRunTuners::Tuner *pTuner,const xml_node<> *pRootNode, const char *strElement);
-    bool _useSDicons(HDHomeRunTuners::Tuner *pTuner);
+    void DuplicateChannelCheck(HDHomeRunTuners::Tuner*);
+    void PrepareGuide(HDHomeRunTuners::Tuner*);
+    bool UseSDIcons(HDHomeRunTuners::Tuner*);
+    bool XmlParseElement(HDHomeRunTuners::Tuner*,const xml_node<>*, const char*);
     std::map<String, std::vector<Json::Value*>> channelMap;
     int tempSeriesId = 0;
     Json::Value jsonNull = Json::Value::null;

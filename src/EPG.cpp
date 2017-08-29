@@ -27,7 +27,7 @@
 
 #include "EPG.h"
 
-const String EPGBase::SD_GuideURL = "http://my.hdhomerun.com/api/guide.php?DeviceAuth=%s";
+const String CEpgBase::SD_GUIDEURL = "http://my.hdhomerun.com/api/guide.php?DeviceAuth=%s";
 
 /*
  *  Author: John Cumming
@@ -35,30 +35,30 @@ const String EPGBase::SD_GuideURL = "http://my.hdhomerun.com/api/guide.php?Devic
  *  http://www.jsolutions.co.uk/C++/objectfactory.html
  */
 
-Registrar::Registrar(String name, std::function<EPGBase*(void)> classFactoryFunction)
+CRegistrar::CRegistrar(String name, std::function<CEpgBase*(void)> classFactoryFunction)
 {
     // register the class factory function
-    EPGFactory::Instance()->RegisterFactoryFunction(name, classFactoryFunction);
+    CEpgFactory::Instance()->RegisterFactoryFunction(name, classFactoryFunction);
 }
 
 
-EPGFactory * EPGFactory::Instance()
+CEpgFactory * CEpgFactory::Instance()
 {
-    static EPGFactory factory;
+    static CEpgFactory factory;
     return &factory;
 }
 
 
-void EPGFactory::RegisterFactoryFunction(String name, std::function<EPGBase*(void)> classFactoryFunction)
+void CEpgFactory::RegisterFactoryFunction(String name, std::function<CEpgBase*(void)> classFactoryFunction)
 {
     // register the class factory function 
     factoryFunctionRegistry[name] = classFactoryFunction;
 }
 
 
-std::shared_ptr<EPGBase> EPGFactory::Create(String name)
+std::shared_ptr<CEpgBase> CEpgFactory::Create(String name)
 {
-  EPGBase * instance = nullptr;
+  CEpgBase * instance = nullptr;
 
   // find name in the registry and call factory method.
   auto it = factoryFunctionRegistry.find(name);
@@ -67,12 +67,12 @@ std::shared_ptr<EPGBase> EPGFactory::Create(String name)
 
   // wrap instance in a shared ptr and return
   if(instance != nullptr)
-    return std::shared_ptr<EPGBase>(instance);
+    return std::shared_ptr<CEpgBase>(instance);
   else
     return nullptr;
 }
 
-void EPGBase::addguideinfo(Json::Value& jsonGuide)
+void CEpgBase::AddGuideInfo(Json::Value& jsonGuide)
 {
   Json::Value::ArrayIndex nCount = 0;
 

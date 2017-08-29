@@ -29,19 +29,19 @@
 
 #include "EPG.h"
 
-class EPG_SD : public EPGBase
+class CEpg_SD : public CEpgBase
 {
 
   public:
-    EPG_SD(){};
-    virtual ~EPG_SD(){};
-    virtual bool UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide);
+    CEpg_SD(){};
+    virtual ~CEpg_SD(){};
+    virtual bool UpdateGuide(HDHomeRunTuners::Tuner*, String);
 
   private:
-    bool _UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
-    bool _UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl);
-    unsigned long long _getEndTime(Json::Value jsonGuide);
-    bool _insert_guide_data(Json::Value &Guide, Json::Value insertdata);
+    unsigned long long GetEndTime(Json::Value);
+    bool InsertGuideData(Json::Value&, Json::Value);
+    bool UpdateAdvancedGuide(HDHomeRunTuners::Tuner*, String);
+    bool UpdateBasicGuide(HDHomeRunTuners::Tuner*, String);
 
 };
 
