@@ -43,6 +43,7 @@ class EPGBase
 
   protected:
     void addguideinfo(Json::Value& jsonGuide);
+    static const String SD_GuideURL;
 };
 
 /*

@@ -103,6 +103,9 @@ void ADDON_ReadSettings(void)
     if (!g.XBMC->GetSetting("xmltv_type", &g.Settings.iXML_Type))
       g.Settings.iXML_Type = 1;
 
+    if (!g.XBMC->GetSetting("xmltv_channelicon", &g.Settings.bXML_icons))
+      g.Settings.bXML_icons = 0;
+
     if (g.Settings.iXML_Type == 0)
     {
       if (g.XBMC->GetSetting("xmltv_url", &buffer))
@@ -215,10 +218,14 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
   else if (strcmp(settingName, "xmltv_file") == 0)
   {
     g.Settings.sXMLTVfile = *(char*)settingValue;
-}
+  }
   else if (strcmp(settingName, "sd_extended") == 0)
   {
     g.Settings.bSD_EPGAdvanced = *(bool*)settingValue;
+  }
+  else if (strcmp(settingName, "xmltv_channelicon") == 0)
+  {
+    g.Settings.bXML_icons = *(bool*)settingValue;
   }
   else if (strcmp(settingName, "sd_extendedinterval") == 0)
   {

@@ -183,6 +183,9 @@ bool EPG_XML::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String xmltvlocation)
       return false;
   }
 
+  if (g.Settings.bXML_icons)
+    EPG_XML::_useSDicons(pTuner);
+
   EPG_XML::_duplicateChannelCheck(pTuner);
   for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)
     EPGBase::addguideinfo(pTuner->Guide[nIndex]["Guide"]);
@@ -217,6 +220,46 @@ bool EPG_XML::_xmlparse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
   if (!EPG_XML::_xmlparseelement(pTuner, pRootElement, "programme"))
     return false;
 
+  return true;
+}
+
+bool EPG_XML::_useSDicons(HDHomeRunTuners::Tuner *pTuner)
+{
+  String strUrl, strJson;
+  Json::Value::ArrayIndex nIndex, nIndex2;
+  Json::Reader jsonReader;
+  Json::Value jsonIconGuide;
+
+  strUrl = StringUtils::Format(EPGBase::SD_GuideURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
+
+  if (GetFileContents(strUrl.c_str(), strJson))
+  {
+    if (jsonReader.parse(strJson, jsonIconGuide) &&
+      jsonIconGuide.type() == Json::arrayValue)
+    {
+      for (nIndex = 0; nIndex < jsonIconGuide.size(); nIndex++)
+      {
+        for (nIndex2 = 0; nIndex2 < pTuner->Guide.size(); nIndex2++)
+        {
+          if (strcmp(pTuner->Guide[nIndex2]["GuideNumber"].asString().c_str(), jsonIconGuide[nIndex]["GuideNumber"].asString().c_str()) == 0)
+          {
+            pTuner->Guide[nIndex2]["ImageURL"] = jsonIconGuide[nIndex]["ImageURL"];
+            break;
+          }
+        }
+      }
+    }
+    else
+    {
+      KODI_LOG(LOG_ERROR, "Failed to parse SD Data");
+      return false;
+    }
+  }
+  else
+  {
+    KODI_LOG(LOG_ERROR, "Failed to retrieve SD Data");
+    return false;
+  }
   return true;
 }
 

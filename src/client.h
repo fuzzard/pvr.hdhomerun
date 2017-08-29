@@ -46,12 +46,14 @@ struct SettingsType
     sXMLTVurl = "";
     iUpdateinterval = 4*60*60;
     iXML_Type = 1;
+    bXML_icons = false;
   }
 
   bool bHideProtected;
   bool bHideDuplicateChannels;
   bool bDebug;
   bool bMarkNew;
+  bool bXML_icons;
   int iEPG;
   int iUpdateinterval;
   bool bSD_EPGAdvanced;

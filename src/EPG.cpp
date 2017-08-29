@@ -27,6 +27,8 @@
 
 #include "EPG.h"
 
+const String EPGBase::SD_GuideURL = "http://my.hdhomerun.com/api/guide.php?DeviceAuth=%s";
+
 /*
  *  Author: John Cumming
  *  Created: 2016-02-02 Tue 21:21

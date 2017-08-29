@@ -68,6 +68,10 @@ msgctxt "#32108"
 msgid "Extended Guide Check Interval (hrs)"
 msgstr "Extended Guide Check Interval (hrs)"
 
+msgctxt "#32109"
+msgid "Use SD Channel Icons if no icon data in guide"
+msgstr "Use SD Channel Icons if no icon data in guide"
+
 msgctxt "#32110"
 msgid "URL"
 msgstr "URL"

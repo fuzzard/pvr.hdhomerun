@@ -38,7 +38,7 @@ bool EPG_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
 {
   String strUrl;
 
-  strUrl = StringUtils::Format("http://my.hdhomerun.com/api/guide.php?DeviceAuth=%s", EncodeURL(pTuner->Device.device_auth).c_str());
+  strUrl = StringUtils::Format(EPGBase::SD_GuideURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
 
   if (advancedguide == "AG")
   {
