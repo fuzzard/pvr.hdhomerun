@@ -312,7 +312,7 @@ bool CEpg_Xml::XmlParseElement(HDHomeRunTuners::Tuner *pTuner, const xml_node<> 
       {
         Json::Value& jsonChannel = CEpg_Xml::FindJsonValue(pTuner->Guide, "GuideNumber", pChannelLCN->value());
         if (jsonChannel.isNull())
-          return false;
+          continue;
         Json::Value* jsonChannelPointer = &jsonChannel;
         vGuide.push_back(jsonChannelPointer);
       }
