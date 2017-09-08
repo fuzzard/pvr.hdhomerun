@@ -15,6 +15,15 @@ environment:
 # clone directory
 clone_folder: c:\projects\%ADDON%
 
+install:
+  # Make unix-compatible patch.exe available to the build by copying it from
+  # Git\usr\bin (that we remove from PATH) to another directory and adding it to
+  # PATH; 
+  - mkdir "C:\Program Files\PatchFromGit"
+  - ps: copy "C:\Program Files\Git\usr\bin\patch.exe" "C:\Program Files\PatchFromGit"
+  - ps: copy "C:\Program Files\Git\usr\bin\msys*.dll" "C:\Program Files\PatchFromGit"
+  - set PATH=C:\Program Files\PatchFromGit;%PATH%
+
 init:
   - echo ADDON=%ADDON%
   - echo CONFIG=%CONFIG%

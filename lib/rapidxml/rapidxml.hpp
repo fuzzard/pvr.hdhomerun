@@ -7,11 +7,11 @@
 //! \file rapidxml.hpp This file contains rapidxml parser and DOM implementation
 
 // If standard library is disabled, user must provide implementations of required functions and typedefs
-//#if !defined(RAPIDXML_NO_STDLIB)
+#if !defined(RAPIDXML_NO_STDLIB)
     #include <cstdlib>      // For std::size_t
     #include <cassert>      // For assert
     #include <new>          // For placement new
-//#endif
+#endif
 
 // On MSVC, disable "conditional expression is constant" warning (level 4). 
 // This warning is almost impossible to avoid with certain types of templated code
@@ -382,7 +382,7 @@ namespace rapidxml
     public:
 
         //! \cond internal
-        typedef void *(alloc_func1)(std::size_t);       // Type of user-defined function used to allocate memory
+        typedef void *(alloc_func)(std::size_t);       // Type of user-defined function used to allocate memory
         typedef void (free_func)(void *);              // Type of user-defined function used to free memory
         //! \endcond
         
@@ -549,7 +549,7 @@ namespace rapidxml
         //! </code><br>
         //! \param af Allocation function, or 0 to restore default function
         //! \param ff Free function, or 0 to restore default function
-        void set_allocator(alloc_func1 *af, free_func *ff)
+        void set_allocator(alloc_func *af, free_func *ff)
         {
             assert(m_begin == m_static_memory && m_ptr == align(m_begin));    // Verify that no memory is allocated yet
             m_alloc_func = af;
@@ -634,7 +634,7 @@ namespace rapidxml
         char *m_ptr;                                        // First free byte in current pool
         char *m_end;                                        // One past last available byte in current pool
         char m_static_memory[RAPIDXML_STATIC_POOL_SIZE];    // Static raw memory
-        alloc_func1 *m_alloc_func;                           // Allocator function, or 0 if default is to be used
+        alloc_func *m_alloc_func;                           // Allocator function, or 0 if default is to be used
         free_func *m_free_func;                             // Free function, or 0 if default is to be used
     };
 
