@@ -226,16 +226,17 @@ bool CEpg_Xml::XmlParse(HDHomeRunTuners::Tuner *pTuner, char *xmlbuffer)
 
 bool CEpg_Xml::UseSDIcons(HDHomeRunTuners::Tuner *pTuner)
 {
-  String strUrl, strJson;
-  Json::Value::ArrayIndex nIndex, nIndex2;
-  Json::Reader jsonReader;
+  String strUrl, strJson, jsonReaderError;
   Json::Value jsonIconGuide;
+  Json::Value::ArrayIndex nIndex, nIndex2;
+  Json::CharReaderBuilder jsonReaderBuilder;
+  std::unique_ptr<Json::CharReader> const reader(jsonReaderBuilder.newCharReader());
 
   strUrl = StringUtils::Format(CEpgBase::SD_GUIDEURL.c_str(), EncodeURL(pTuner->Device.device_auth).c_str());
 
   if (GetFileContents(strUrl.c_str(), strJson))
   {
-    if (jsonReader.parse(strJson, jsonIconGuide) &&
+    if (reader->parse(strJson.c_str(), strJson.c_str() + strJson.size(), &jsonIconGuide, &jsonReaderError) &&
       jsonIconGuide.type() == Json::arrayValue)
     {
       for (nIndex = 0; nIndex < jsonIconGuide.size(); nIndex++)
@@ -475,7 +476,7 @@ Json::Value& CEpg_Xml::FindJsonValue(Json::Value &Guide, String jsonElement, Str
  * Original: http://github.com/afedchin/xbmc-addon-iptvsimple/
  */
 
-int CEpg_Xml::ParseDateTime(std::string& strDate)
+long int CEpg_Xml::ParseDateTime(std::string& strDate)
 {
   struct tm timeinfo;
   memset(&timeinfo, 0, sizeof(tm));

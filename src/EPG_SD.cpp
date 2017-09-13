@@ -69,8 +69,9 @@ bool CEpg_SD::UpdateGuide(HDHomeRunTuners::Tuner *pTuner, String advancedguide)
 bool CEpg_SD::UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
   Json::Value::ArrayIndex nIndex;
-  String strJson, strUrlExtended, strJsonExtended;
-  Json::Reader jsonReader;
+  String strJson, strUrlExtended, strJsonExtended, jsonReaderError;
+  Json::CharReaderBuilder jsonReaderBuilder;
+  std::unique_ptr<Json::CharReader> const reader(jsonReaderBuilder.newCharReader());
   bool exitExtend;
   unsigned long long endTime;
   Json::Value tempGuide;
@@ -96,7 +97,7 @@ bool CEpg_SD::UpdateAdvancedGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
         }
         else
         {
-          if (jsonReader.parse(strJsonExtended, tempGuide) &&
+          if (reader->parse(strJsonExtended.c_str(), strJsonExtended.c_str() + strJsonExtended.size(), &tempGuide, &jsonReaderError) &&
             tempGuide.type() == Json::arrayValue)
           {
             CEpg_SD::InsertGuideData(pTuner->Guide[nIndex]["Guide"], tempGuide);
@@ -140,14 +141,15 @@ bool CEpg_SD::InsertGuideData(Json::Value &Guide, Json::Value strInsertdata)
 bool CEpg_SD::UpdateBasicGuide(HDHomeRunTuners::Tuner *pTuner, String strUrl)
 {
   Json::Value::ArrayIndex nIndex;
-  String strJson;
-  Json::Reader jsonReader;
+  String strJson, jsonReaderError;
+  Json::CharReaderBuilder jsonReaderBuilder;
+  std::unique_ptr<Json::CharReader> const reader(jsonReaderBuilder.newCharReader());
 
   KODI_LOG(LOG_DEBUG, "Requesting HDHomeRun Basic guide: %s", strUrl.c_str());
 
   if (GetFileContents(strUrl.c_str(), strJson))
   {
-    if (jsonReader.parse(strJson, pTuner->Guide) &&
+    if (reader->parse(strJson.c_str(), strJson.c_str() + strJson.size(), &pTuner->Guide, &jsonReaderError) &&
       pTuner->Guide.type() == Json::arrayValue)
     {
       for (nIndex = 0; nIndex < pTuner->Guide.size(); nIndex++)

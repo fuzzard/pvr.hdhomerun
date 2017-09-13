@@ -47,7 +47,7 @@ class CEpg_Xml : public CEpgBase
   protected:
     Json::Value& FindJsonValue(Json::Value&, String, String);
     bool GzipInflate(const String&, String&);
-    int ParseDateTime(String&);
+    long int ParseDateTime(String&);
     bool XmlParse(HDHomeRunTuners::Tuner*, char*);
 
   private:

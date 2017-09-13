@@ -26,7 +26,7 @@
 #include "client.h"
 #include <p8-platform/threads/mutex.h>
 #include <hdhomerun.h>
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 
 class HDHomeRunTuners
 {

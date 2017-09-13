@@ -161,8 +161,9 @@ bool HDHomeRunTuners::Update(int nMode)
 bool HDHomeRunTuners::UpdateChannelLineUp(Tuner *pTuner)
 {
   Json::Value::ArrayIndex nIndex, nGuideIndex;
-  String strUrl, strJson;
-  Json::Reader jsonReader;
+  String strUrl, strJson, jsonReaderError;
+  Json::CharReaderBuilder jsonReaderBuilder;
+  std::unique_ptr<Json::CharReader> const reader(jsonReaderBuilder.newCharReader());
 
   strUrl = StringUtils::Format("%s/lineup.json", pTuner->Device.base_url);
 
@@ -170,7 +171,7 @@ bool HDHomeRunTuners::UpdateChannelLineUp(Tuner *pTuner)
 
   if (GetFileContents(strUrl.c_str(), strJson))
   {
-    if (jsonReader.parse(strJson, pTuner->LineUp) &&
+    if (reader->parse(strJson.c_str(), strJson.c_str() + strJson.size(), &pTuner->LineUp, &jsonReaderError) &&
       pTuner->LineUp.type() == Json::arrayValue)
     {
       std::set<String> guideNumberSet;

@@ -30,7 +30,7 @@
 #define EPG_H
 
 #include <functional>
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 #include <map>
 #include <memory>
 

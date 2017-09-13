@@ -27,8 +27,6 @@ set(DEPLIBS ${kodiplatform_LIBRARIES}
             ${ZLIB_LIBRARIES}
             ${HDHOMERUN_LIBRARIES})
 
-message(STATUS "ZLIB_LIBRARIES: ${ZLIB_LIBRARIES}")
-
 set(PVRHDHOMERUN_SOURCES src/client.cpp
                          src/HDHomeRunTuners.cpp
                          src/Utils.cpp
