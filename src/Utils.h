@@ -50,6 +50,6 @@ int DbgPrintf(const char* szFormat, ...);
 #define PVR_STRCLR(dest) memset(dest, 0, sizeof(dest))
 
 bool GetFileContents(const String& url, String& strContent);
-bool GetCurlFileContents(const String& url, String& strContent);
+bool CheckTunerAvailable(const String& url);
 
 String EncodeURL(const String& strUrl);

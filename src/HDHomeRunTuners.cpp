@@ -384,6 +384,7 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannelGroupMembers(ADDON_HANDLE handle, const 
   AutoLock l(this);
 
   for (Tuners::const_iterator iterTuner = m_Tuners.begin(); iterTuner != m_Tuners.end(); iterTuner++)
+  {
     for (Json::Value::ArrayIndex nChannelIndex = 0; nChannelIndex < iterTuner->LineUp.size(); nChannelIndex++)
     {
       const Json::Value& jsonChannel = iterTuner->LineUp[nChannelIndex];
@@ -404,28 +405,33 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannelGroupMembers(ADDON_HANDLE handle, const 
 
       g.PVR->TransferChannelGroupMember(handle, &channelGroupMember);
     }
+  }
 
   return PVR_ERROR_NO_ERROR;
 }
 
 std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId)
 {
-    Json::Value::ArrayIndex nIndex;
+  Json::Value::ArrayIndex nIndex;
 
-    AutoLock l(this);
-  
-    for (Tuners::const_iterator iterTuner = m_Tuners.begin(); iterTuner != m_Tuners.end(); iterTuner++)
+  AutoLock l(this);
+
+  for (Tuners::const_iterator iterTuner = m_Tuners.begin(); iterTuner != m_Tuners.end(); iterTuner++)
+  {
+    for (nIndex = 0; nIndex < iterTuner->LineUp.size(); nIndex++)
     {
-        for (nIndex = 0; nIndex < iterTuner->LineUp.size(); nIndex++)
-        {
-            const Json::Value& jsonChannel = iterTuner->LineUp[nIndex];
+      const Json::Value& jsonChannel = iterTuner->LineUp[nIndex];
 
-            if (jsonChannel["_UID"].asUInt() == iUniqueId)
-            {
-                std::string url = jsonChannel["URL"].asString();
-                return url;
-            }
+      if (jsonChannel["_UID"].asUInt() == iUniqueId)
+      {
+        if (CheckTunerAvailable(jsonChannel["URL"].asString()))
+        {
+          std::string url = jsonChannel["URL"].asString();
+          return url;
         }
+      }
     }
-    return "";
+  }
+  KODI_LOG(LOG_ERROR, "No Available Tuner");
+  return "";
 }

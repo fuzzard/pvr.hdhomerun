@@ -97,39 +97,22 @@ String EncodeURL(const String& strUrl)
   return str;
 }
 
-bool GetCurlFileContents(const String& url, String& strContent)
+bool CheckTunerAvailable(const String& url)
 {
-  char buffer[1024];
   void* fileHandle;
 
-  strContent.clear();
-  fileHandle = XBMC->CURLCreate(url.c_str());
+  fileHandle = g.XBMC->CURLCreate(url.c_str());
 
   if (fileHandle == NULL)
   {
-    KODI_LOG(0, "GetCurlFileContents: %s failed\n", url.c_str());
     return false;
   }
 
-  if (!XBMC->CurlOpen(fileHandle, XFILE::READ_NO_CACHE))
+  // 503 error spits out here
+  // GetFilePropertyValue does not work as the CURLOpen has failed
+  if (!g.XBMC->CURLOpen(fileHandle, XFILE::READ_NO_CACHE))
   {
-    KODI_LOG(0, "GetCurlFileContents: %s failed\n", url.c_str());
-    return false
-  }
-
-  char *statusPtr = XBMC->GetFileProperty(fileHandle, XFILE::FILE_PROPERTY_RESPONSE_PROTOCOL, nullptr);
-  if (statusPtr && *statusPtr)
-  {
-    // check if errorcode 403 returned
-  }
-  XBMC->FreeString(statusPtr);
-
-  for (;;)
-  {
-    ssize_t bytesRead = g.XBMC->ReadFile(fileHandle, buffer, sizeof(buffer));
-    if (bytesRead <= 0)
-      break;
-    strContent.append(buffer, bytesRead);
+    return false;
   }
 
   g.XBMC->CloseFile(fileHandle);
@@ -137,22 +120,3 @@ bool GetCurlFileContents(const String& url, String& strContent)
   return true;
 }
 
-String EncodeURL(const String& strUrl)
-{
-  String str, strEsc;
-
-  for (String::const_iterator iter = strUrl.begin(); iter != strUrl.end(); iter++)
-  {
-    char c = *iter;
-
-    if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
-      str += c;
-    else
-    {
-      String strPercent = StringUtils::Format("%%%02X", (int)c);
-      str += strPercent;
-    }
-  }
-
-  return str;
-}
