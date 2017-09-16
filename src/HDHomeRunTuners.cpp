@@ -442,10 +442,7 @@ bool HDHomeRunTuners::OpenStream(const String& url)
   {
     CloseLiveStream();
   }
-  if (url.size())
-  {
-    fileHandle = g.XBMC->OpenFile(url.c_str(), 0);
-  }
+  fileHandle = g.XBMC->OpenFile(url.c_str(), 0);
 
   KODI_LOG(LOG_DEBUG, "Attempt to tune TCP stream from url %s : %s",
           url.c_str(),
@@ -462,8 +459,11 @@ bool HDHomeRunTuners::OpenLiveStream(const PVR_CHANNEL& channel)
   if (!url.empty())
   {
     if (OpenStream(url))
+    {
       return true;
+    }
   }
+
   return false;
 }
 
@@ -471,8 +471,11 @@ void HDHomeRunTuners::CloseLiveStream(void)
 {
   AutoLock l(this);
 
-  g.XBMC->CloseFile(fileHandle);
-  fileHandle = nullptr;
+  if (fileHandle)
+  {
+    g.XBMC->CloseFile(fileHandle);
+    fileHandle = nullptr;
+  }
 }
 
 int HDHomeRunTuners::ReadLiveStream(unsigned char* buffer, unsigned int size)

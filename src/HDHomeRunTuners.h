@@ -91,5 +91,5 @@ public:
 protected:
   Tuners m_Tuners;
   P8PLATFORM::CMutex m_Lock;
-  void* fileHandle;
+  void* fileHandle = nullptr;
 };
