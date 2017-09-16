@@ -435,3 +435,53 @@ std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId)
   KODI_LOG(LOG_ERROR, "No Available Tuner");
   return "";
 }
+
+bool HDHomeRunTuners::OpenStream(const String& url)
+{
+  if (fileHandle)
+  {
+    CloseLiveStream();
+  }
+  if (url.size())
+  {
+    fileHandle = g.XBMC->OpenFile(url.c_str(), 0);
+  }
+
+  KODI_LOG(LOG_DEBUG, "Attempt to tune TCP stream from url %s : %s",
+          url.c_str(),
+          fileHandle == nullptr ? "Fail":"Success");
+
+  return fileHandle != nullptr;
+}
+
+bool HDHomeRunTuners::OpenLiveStream(const PVR_CHANNEL& channel)
+{
+  AutoLock l(this);
+
+  String url = _GetChannelStreamURL(channel.iUniqueId);
+  if (!url.empty())
+  {
+    if (OpenStream(url))
+      return true;
+  }
+  return false;
+}
+
+void HDHomeRunTuners::CloseLiveStream(void)
+{
+  AutoLock l(this);
+
+  g.XBMC->CloseFile(fileHandle);
+  fileHandle = nullptr;
+}
+
+int HDHomeRunTuners::ReadLiveStream(unsigned char* buffer, unsigned int size)
+{
+  AutoLock l(this);
+
+  if (fileHandle)
+  {
+    return g.XBMC->ReadFile(fileHandle, buffer, size);
+  }
+  return 0;
+}

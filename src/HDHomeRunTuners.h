@@ -79,6 +79,10 @@ public:
   std::string _GetChannelStreamURL(int iUniqueId);
   bool UpdateChannelLineUp(Tuner *pTuner);
   unsigned int PvrCalculateUniqueId(const String& str);
+  bool OpenStream(const String& url);
+  bool OpenLiveStream(const PVR_CHANNEL& channel);
+  int ReadLiveStream(unsigned char* buffer, unsigned int size);
+  void CloseLiveStream(void);
 
 public:
   void Lock() { m_Lock.Lock(); }
@@ -87,4 +91,5 @@ public:
 protected:
   Tuners m_Tuners;
   P8PLATFORM::CMutex m_Lock;
+  void* fileHandle;
 };

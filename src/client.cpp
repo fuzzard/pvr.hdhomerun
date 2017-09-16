@@ -345,15 +345,18 @@ PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &g
 
 bool OpenLiveStream(const PVR_CHANNEL &channel)
 {
-  CloseLiveStream();
+  return g.Tuners ? g.Tuners->OpenLiveStream(channel) : false;
+}
 
-  g.iCurrentChannelUniqueId = channel.iUniqueId;
-
-  return true;
+int ReadLiveStream(unsigned char *pBuffer, unsigned int iBufferSize)
+{ 
+  return g.Tuners ? g.Tuners->ReadLiveStream(pBuffer, iBufferSize) : 0;
 }
 
 void CloseLiveStream(void)
 {
+  if (g.Tuners)
+    g.Tuners->CloseLiveStream();
   g.iCurrentChannelUniqueId = 0;
 }
 
@@ -377,6 +380,11 @@ bool CanSeekStream(void)
 
 PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE* properties, unsigned int* iPropertiesCount)
 {
+  return PVR_ERROR_NOT_IMPLEMENTED;
+} 
+/*
+PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE* properties, unsigned int* iPropertiesCount)
+{
   if (!channel || !properties || !iPropertiesCount)
     return PVR_ERROR_SERVER_ERROR;
 
@@ -393,7 +401,7 @@ PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE
   *iPropertiesCount = 1;
 
   return PVR_ERROR_NO_ERROR;
-}
+}*/
 
 /* UNUSED API FUNCTIONS */
 PVR_ERROR CallMenuHook(const PVR_MENUHOOK&, const PVR_MENUHOOK_DATA&) { return PVR_ERROR_NOT_IMPLEMENTED; }
@@ -416,7 +424,6 @@ long long PositionRecordedStream(void) { return -1; }
 long long LengthRecordedStream(void) { return 0; }
 void DemuxReset(void) {}
 void DemuxFlush(void) {}
-int ReadLiveStream(unsigned char*, unsigned int) { return 0; }
 long long SeekLiveStream(long long, int) { return -1; }
 long long PositionLiveStream(void) { return -1; }
 long long LengthLiveStream(void) { return -1; }
