@@ -51,5 +51,6 @@ int DbgPrintf(const char* szFormat, ...);
 
 bool GetFileContents(const String& url, String& strContent);
 bool CheckTunerAvailable(const String& url);
+bool CheckTunerAvailable2(const String& url);
 
 String EncodeURL(const String& strUrl);
