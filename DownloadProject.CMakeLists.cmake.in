@@ -1,0 +1,13 @@
+# Distributed under the OSI-approved MIT License.  See accompanying
+# file LICENSE or https://github.com/Crascit/DownloadProject for details.
+
+cmake_minimum_required(VERSION 2.8.2)
+
+project(${DL_ARGS_PROJ} NONE)
+
+include(ExternalProject)
+ExternalProject_Add(${DL_ARGS_PROJ}
+                    ${DL_ARGS_UNPARSED_ARGUMENTS}
+                    PATCH_COMMAND ${CURL_PATCH_COMMAND}
+                    CMAKE_ARGS ${DL_ARGS_CMAKE_ARGS}
+)

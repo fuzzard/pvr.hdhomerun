@@ -25,8 +25,6 @@
 #include "client.h"
 #include "Utils.h"
 
-#include <curl/curl.h>
-
 #if defined(USE_DBG_CONSOLE) && defined(TARGET_WINDOWS)
 int DbgPrintf(const char* szFormat, ...)
 {
@@ -142,7 +140,7 @@ bool CheckTunerAvailable(const String& url)
   curl_easy_cleanup(curlHandle);
   return true;
 }
-
+/*
 // Working but not ideal as we dont receive protocol status, we only get a failure for
 // any status >= 400 from xbmc's curl implementation
 bool CheckTunerAvailable2(const String& url)
@@ -167,4 +165,5 @@ bool CheckTunerAvailable2(const String& url)
 
   return true;
 }
+*/
 

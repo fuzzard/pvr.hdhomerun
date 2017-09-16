@@ -1,1 +1,1 @@
-jsoncpp https://github.com/open-source-parsers/jsoncpp/archive/1.8.3.tar.gz
+jsoncpp https://github.com/open-source-parsers/jsoncpp/archive/4d587638af9b79ad379cf831f28f19f64f33c0ef.tar.gz

@@ -22,8 +22,13 @@
  *  http://www.gnu.org/copyleft/gpl.html
  *
  */
-
+#ifndef UTILS_H
+#define UTILS_H
 #include "client.h"
+
+#include <curl/curl.h>
+#include <curl/easy.h>
+
 #include <stdlib.h>
 
 #if defined(TARGET_WINDOWS) && defined(DEBUG)
@@ -51,6 +56,8 @@ int DbgPrintf(const char* szFormat, ...);
 
 bool GetFileContents(const String& url, String& strContent);
 bool CheckTunerAvailable(const String& url);
-bool CheckTunerAvailable2(const String& url);
+//bool CheckTunerAvailable2(const String& url);
 
 String EncodeURL(const String& strUrl);
+
+#endif
