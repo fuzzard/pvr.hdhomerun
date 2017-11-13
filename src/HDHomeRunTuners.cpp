@@ -427,13 +427,17 @@ bool HDHomeRunTuners::OpenStream(const String& url)
 bool HDHomeRunTuners::OpenLiveStream(const PVR_CHANNEL& channel)
 {
   AutoLock l(this);
-
+  std::string url = _testUDP();
+  if (OpenStream(url))
+    return true;
+/*
   std::string url = _GetChannelStreamURL(channel.iUniqueId);
   if (!url.empty())
     if (OpenStream(url))
       return true;
 
   return false;
+*/
 }
 
 void HDHomeRunTuners::CloseLiveStream(void)
@@ -456,3 +460,84 @@ int HDHomeRunTuners::ReadLiveStream(unsigned char* buffer, unsigned int size)
 
   return 0;
 }
+
+int HDHomeRunTuners::tunerunlock()
+{
+  hdhomerun_device_t* tstdevice = hdhomerun_device_create_from_str("192.168.1.245", NULL);
+  int tunerLock = hdhomerun_device_tuner_lockkey_release(tstdevice);
+
+  if(tunerLock < 1)
+  {
+    KODI_LOG(LOG_DEBUG, "Tuner Release Failed");
+  }
+  else
+  {
+    KODI_LOG(LOG_DEBUG, "Tuner Released");
+  }
+  return tunerLock;
+}
+
+std::string HDHomeRunTuners::_testUDP()
+{
+
+//  nTunerCount = hdhomerun_discover_find_devices_custom_v2(0, HDHOMERUN_DEVICE_TYPE_TUNER, HDHOMERUN_DEVICE_ID_WILDCARD, foundDevices, 16);
+
+String target = "192.168.1.218:5000";
+
+hdhomerun_device_t* dbg;
+hdhomerun_device_t* tstdevice = hdhomerun_device_create_from_str("192.168.1.245", NULL);
+    int tunerLock = 0;
+    char *error = NULL;
+unsigned int tsttuner = 0;
+char *pchannel[1024];
+    //RunProlog();
+    /* Get a tuner lock */
+int tst1 = hdhomerun_device_tuner_lockkey_force(tstdevice);
+        KODI_LOG(LOG_DEBUG, "Tuner Force unlock: %u", tst1);
+    tunerLock = hdhomerun_device_tuner_lockkey_request(tstdevice, &error);
+//    tsttuner = hdhomerun_device_get_tuner(tstdevice);
+//  hdhomerun_device_get_tuner_channel(tstdevice, pchannel);
+//        KODI_LOG(LOG_DEBUG, "Tuner Channel: %s", pchannel[0]);
+int setChannel = hdhomerun_device_set_tuner_channel(tstdevice, "auto:5");
+int setProgram = hdhomerun_device_set_tuner_program(tstdevice, "1344");
+int setTarget = hdhomerun_device_set_tuner_target(tstdevice, target.c_str());
+  //      KODI_LOG(LOG_DEBUG, "Set Channel Result: %u, Set Program Result: %u, Set Target Result: %u", setChannel, setProgram, setTarget);
+    if(tunerLock < 1)
+    {
+        KODI_LOG(LOG_DEBUG, "No tuner lock: %u", tunerLock);
+   //     KODI_LOG(LOG_DEBUG, "Tuner Channel: %s, Set Channel Result: %u", pchannel[0], setChannel);
+        return "";
+    }
+    else
+    {
+        KODI_LOG(LOG_DEBUG, "Tuner Lock acquired: %u", tunerLock);
+   //     KODI_LOG(LOG_DEBUG, "Tuner Channel: %s, Set Channel Result: %u", pchannel[0], setChannel);
+    }
+
+  std::string strUrl = "udp://@:5000";
+//  std::string strUrl = "http://192.168.1.245:5004/auto/v1";
+  return strUrl;
+}
+
+bool HDHomeRunTuners::GetIndividualTunerCount(HDHomeRunTuners::Tuner* pTuner)
+{
+  std::string strUrl, strJson;
+  Json::Reader jsonReader;
+  Json::Value jsonResponse;
+
+  strUrl = StringUtils::Format("%s/discover.json", pTuner->Device.base_url);
+
+  KODI_LOG(LOG_DEBUG, "Requesting HDHomeRun Discover: %s", strUrl.c_str());
+
+  if (GetFileContents(strUrl.c_str(), strJson))
+  {
+    if (jsonReader.parse(strJson, jsonResponse) &&
+      jsonResponse == Json::arrayValue)
+    {
+//      pTuner->individualTunerCount = jsonResponse["TunerCount"].asUint();
+      return true;
+    }
+  }
+  return false;
+}
+

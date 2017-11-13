@@ -293,8 +293,9 @@ bool CanSeekStream(void)
 
 PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE* properties, unsigned int* iPropertiesCount)
 {
-/*
-  std::string strUrl = g.Tuners->_GetChannelStreamURL(channel->iUniqueId);
+
+//  std::string strUrl = g.Tuners->_GetChannelStreamURL(channel->iUniqueId);
+  std::string strUrl = g.Tuners->_testUDP();
   if (strUrl.empty()) {
     return PVR_ERROR_FAILED;
   }
@@ -304,8 +305,8 @@ PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE
   *iPropertiesCount = 1;
 
   return PVR_ERROR_NO_ERROR;
-*/
-  return PVR_ERROR_NOT_IMPLEMENTED;
+
+//  return PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 bool OpenLiveStream(const PVR_CHANNEL &channel)
