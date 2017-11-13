@@ -273,20 +273,6 @@ PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &g
   return g.Tuners ? g.Tuners->PvrGetChannelGroupMembers(handle, group) : PVR_ERROR_SERVER_ERROR;
 }
 
-bool OpenLiveStream(const PVR_CHANNEL &channel)
-{
-  CloseLiveStream();
-
-  g.iCurrentChannelUniqueId = channel.iUniqueId;
-
-  return true;
-}
-
-void CloseLiveStream(void)
-{
-  g.iCurrentChannelUniqueId = 0;
-}
-
 PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS &signalStatus)
 {
   PVR_STRCPY(signalStatus.strAdapterName, "PVR HDHomeRun Adapter 1");
@@ -307,6 +293,7 @@ bool CanSeekStream(void)
 
 PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE* properties, unsigned int* iPropertiesCount)
 {
+/*
   std::string strUrl = g.Tuners->_GetChannelStreamURL(channel->iUniqueId);
   if (strUrl.empty()) {
     return PVR_ERROR_FAILED;
@@ -317,8 +304,26 @@ PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE
   *iPropertiesCount = 1;
 
   return PVR_ERROR_NO_ERROR;
-} 
-  
+*/
+  return PVR_ERROR_NOT_IMPLEMENTED;
+}
+
+bool OpenLiveStream(const PVR_CHANNEL &channel)
+{
+  return g.Tuners ? g.Tuners->OpenLiveStream(channel) : false;
+}
+
+int ReadLiveStream(unsigned char *pBuffer, unsigned int iBufferSize)
+{
+  return g.Tuners ? g.Tuners->ReadLiveStream(pBuffer, iBufferSize) : 0;
+}
+
+void CloseLiveStream(void)
+{
+  if (g.Tuners)
+    g.Tuners->CloseLiveStream();
+}
+
 /* UNUSED API FUNCTIONS */
 PVR_ERROR CallMenuHook(const PVR_MENUHOOK&, const PVR_MENUHOOK_DATA&) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES*) { return PVR_ERROR_NOT_IMPLEMENTED; }
@@ -340,7 +345,6 @@ long long PositionRecordedStream(void) { return -1; }
 long long LengthRecordedStream(void) { return 0; }
 void DemuxReset(void) {}
 void DemuxFlush(void) {}
-int ReadLiveStream(unsigned char*, unsigned int) { return 0; }
 long long SeekLiveStream(long long, int) { return -1; }
 long long PositionLiveStream(void) { return -1; }
 long long LengthLiveStream(void) { return -1; }

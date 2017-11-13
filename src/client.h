@@ -66,6 +66,7 @@ struct GlobalsType
   String strClientPath;
   ADDON::CHelper_libXBMC_addon* XBMC;
   CHelper_libXBMC_pvr* PVR;
+  std::string strCurlHeader;
 
   HDHomeRunTuners* Tuners;
 

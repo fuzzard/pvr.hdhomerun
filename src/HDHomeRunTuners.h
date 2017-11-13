@@ -77,6 +77,10 @@ public:
   PVR_ERROR PvrGetChannelGroups(ADDON_HANDLE handle, bool bRadio);
   PVR_ERROR PvrGetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &group);
   std::string _GetChannelStreamURL(int iUniqueId);
+  bool OpenStream(const std::string& url);
+  bool OpenLiveStream(const PVR_CHANNEL& channel);
+  int ReadLiveStream(unsigned char* buffer, unsigned int size);
+  void CloseLiveStream(void);
 
 protected:
   unsigned int PvrCalculateUniqueId(const String& str);
@@ -88,4 +92,5 @@ public:
 protected:
   Tuners m_Tuners;
   P8PLATFORM::CMutex m_Lock;
+  void* fileHandle = nullptr;
 };
