@@ -82,7 +82,6 @@ public:
   int ReadLiveStream(unsigned char* buffer, unsigned int size);
   void CloseLiveStream(void);
 
-  bool GetIndividualTunerCount(HDHomeRunTuners::Tuner*); 
   std::string _testUDP(const PVR_CHANNEL* channel);
   int tunerunlock();
 

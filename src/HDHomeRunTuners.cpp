@@ -533,26 +533,3 @@ std::string HDHomeRunTuners::_testUDP(const PVR_CHANNEL* channel)
 //  std::string strUrl = "http://192.168.1.245:5004/auto/v1";
   return strUrl;
 }
-
-bool HDHomeRunTuners::GetIndividualTunerCount(HDHomeRunTuners::Tuner* pTuner)
-{
-  std::string strUrl, strJson;
-  Json::Reader jsonReader;
-  Json::Value jsonResponse;
-
-  strUrl = StringUtils::Format("%s/discover.json", pTuner->Device.base_url);
-
-  KODI_LOG(LOG_DEBUG, "Requesting HDHomeRun Discover: %s", strUrl.c_str());
-
-  if (GetFileContents(strUrl.c_str(), strJson))
-  {
-    if (jsonReader.parse(strJson, jsonResponse) &&
-      jsonResponse == Json::arrayValue)
-    {
-//      pTuner->individualTunerCount = jsonResponse["TunerCount"].asUint();
-      return true;
-    }
-  }
-  return false;
-}
-
