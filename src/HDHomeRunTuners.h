@@ -83,7 +83,7 @@ public:
   void CloseLiveStream(void);
 
   bool GetIndividualTunerCount(HDHomeRunTuners::Tuner*); 
-  std::string _testUDP();
+  std::string _testUDP(const PVR_CHANNEL* channel);
   int tunerunlock();
 
 protected:

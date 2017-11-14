@@ -295,7 +295,7 @@ PVR_ERROR GetChannelStreamProperties(const PVR_CHANNEL* channel, PVR_NAMED_VALUE
 {
 
 //  std::string strUrl = g.Tuners->_GetChannelStreamURL(channel->iUniqueId);
-  std::string strUrl = g.Tuners->_testUDP();
+  std::string strUrl = g.Tuners->_testUDP(channel);
   if (strUrl.empty()) {
     return PVR_ERROR_FAILED;
   }
