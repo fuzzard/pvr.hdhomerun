@@ -10,17 +10,19 @@ language: cpp
 matrix:
   include:
     - os: linux
-      dist: trusty    
-      sudo: required
+      dist: trusty
+      sudo: false
       compiler: gcc
     - os: linux
-      dist: trusty    
-      sudo: required
+      dist: trusty
+      sudo: false
       compiler: clang
+    - os: osx
+      osx_image: xcode9.2
     - os: osx
       osx_image: xcode7.3
     - os: osx
-      osx_image: xcode6.1
+      osx_image: xcode6.4
 
 #
 # Some of the OS X images don't have cmake, contrary to what people
