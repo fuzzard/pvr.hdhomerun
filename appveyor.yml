@@ -16,6 +16,9 @@ environment:
     - CMAKE_GENERATOR: Visual Studio 15 2017 Win64
       CONFIG: Release
 
+install:
+  - choco install vswhere
+
 # clone directory
 clone_folder: c:\projects\%ADDON%
 
@@ -24,10 +27,11 @@ init:
   - echo CONFIG=%CONFIG%
   - echo CMAKE_GENERATOR=%CMAKE_GENERATOR%
   - cmake --version
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - msbuild /version
   - git --version
   - git clone --depth=1 https://github.com/xbmc/xbmc.git %ROOT%\xbmc
-  
+
 build_script:
   - mkdir %ROOT%\%ADDON%\build
   - cd %ROOT%\%ADDON%\build
