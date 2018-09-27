@@ -263,7 +263,7 @@ int HDHomeRunTuners::PvrGetChannelsAmount()
   return nCount;
 }
 
-PVR_ERROR HDHomeRunTuners::PvrGetChannels(ADDON_HANDLE handle, bool bRadio)
+PVR_ERROR HDHomeRunTuners::PvrGetChannels(const ADDON_HANDLE* handle, bool bRadio)
 {
   if (bRadio)
     return PVR_ERROR_NO_ERROR;
@@ -294,7 +294,7 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannels(ADDON_HANDLE handle, bool bRadio)
   return PVR_ERROR_NO_ERROR;
 }
 
-PVR_ERROR HDHomeRunTuners::PvrGetEPGForChannel(ADDON_HANDLE handle, const PVR_CHANNEL& channel, time_t iStart, time_t iEnd)
+PVR_ERROR HDHomeRunTuners::PvrGetEPGForChannel(const ADDON_HANDLE* handle, const PVR_CHANNEL& channel, time_t iStart, time_t iEnd)
 {
   AutoLock l(this);
 
@@ -352,7 +352,7 @@ int HDHomeRunTuners::PvrGetChannelGroupsAmount()
   return 3;
 }
 
-PVR_ERROR HDHomeRunTuners::PvrGetChannelGroups(ADDON_HANDLE handle, bool bRadio)
+PVR_ERROR HDHomeRunTuners::PvrGetChannelGroups(const ADDON_HANDLE* handle, bool bRadio)
 {
   if (bRadio)
     return PVR_ERROR_NO_ERROR;
@@ -380,7 +380,7 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannelGroups(ADDON_HANDLE handle, bool bRadio)
   return PVR_ERROR_NO_ERROR;
 }
 
-PVR_ERROR HDHomeRunTuners::PvrGetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &group)
+PVR_ERROR HDHomeRunTuners::PvrGetChannelGroupMembers(const ADDON_HANDLE* handle, const PVR_CHANNEL_GROUP& group)
 {
   AutoLock l(this);
 
@@ -408,7 +408,7 @@ PVR_ERROR HDHomeRunTuners::PvrGetChannelGroupMembers(ADDON_HANDLE handle, const 
   return PVR_ERROR_NO_ERROR;
 }
 
-std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId)
+std::string HDHomeRunTuners::GetChannelStreamURL(const int* iUniqueId)
 {
   AutoLock l(this);
 
