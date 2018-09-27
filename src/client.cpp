@@ -83,8 +83,10 @@ void ADDON_ReadSettings(void)
 
 ADDON_STATUS ADDON_Create(void* hdl, void* props)
 {
+  g.currentStatus = ADDON_STATUS_UNKNOWN;
+
   if (!hdl || !props)
-    return ADDON_STATUS_UNKNOWN;
+    return g.currentStatus;
 
   g.XBMC = new ADDON::CHelper_libXBMC_addon;
   if (!g.XBMC->RegisterMe(hdl))
@@ -102,8 +104,6 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
   }
 
   KODI_LOG(ADDON::LOG_NOTICE, "%s - Creating the PVR HDHomeRun add-on", __FUNCTION__);
-
-  g.currentStatus = ADDON_STATUS_UNKNOWN;
 
   g.Tuners = new HDHomeRunTuners;
   if (g.Tuners == NULL)
@@ -125,7 +125,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 
   g.currentStatus = ADDON_STATUS_OK;
 
-  return ADDON_STATUS_OK;
+  return g.currentStatus;
 }
 
 ADDON_STATUS ADDON_GetStatus()
