@@ -88,8 +88,7 @@ std::string EncodeURL(const std::string& strUrl)
       str += c;
     else
     {
-      std::string strPercent = StringUtils::Format("%%%02X", (int)c);
-      str += strPercent;
+      str += StringUtils::Format("%%%02X", static_cast<int>c);
     }
   }
 

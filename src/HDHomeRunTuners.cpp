@@ -43,8 +43,8 @@ static const std::string g_strGroupSDChannels("SD channels");
 
 unsigned int HDHomeRunTuners::PvrCalculateUniqueId(const std::string& str)
 {
-  int nHash = (int)std::hash<std::string>()(str);
-  return (unsigned int)abs(nHash);
+  int nHash = static_cast<int>(std::hash<std::string>()(str));
+  return static_cast<unsigned int>(abs(nHash));
 }
 
 bool HDHomeRunTuners::Update(int nMode)
