@@ -36,12 +36,16 @@ struct SettingsType
     bHideDuplicateChannels = true;
     bDebug = false;
     bMarkNew = false;
+    bRecording = true;
+    strRecPath = "special://recordings/";
   }
 
   bool bHideProtected;
   bool bHideDuplicateChannels;
   bool bDebug;
   bool bMarkNew;
+  bool bRecording;
+  std::string strRecPath;
 };
 
 struct GlobalsType

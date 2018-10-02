@@ -79,6 +79,14 @@ void ADDON_ReadSettings(void)
 
   if (!g.XBMC->GetSetting("debug", &g.Settings.bDebug))
     g.Settings.bDebug = false;
+
+  char buffer[2048];
+  g.XBMC->GetSetting("recpath", &buffer);
+  if (strcmp(buffer, "") == 0)
+    g.Settings.strRecPath = "special://recordings/";
+  else
+    g.Settings.strRecPath = buffer;
+
 }
 
 ADDON_STATUS ADDON_Create(void* hdl, void* props)
@@ -163,6 +171,8 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
     g.Settings.bMarkNew = *(bool*)settingValue;
   else if (strcmp(settingName, "debug") == 0)
     g.Settings.bDebug = *(bool*)settingValue;
+  else if (strcmp(settingName, "recpath") == 0)
+    g.Settings.strRecPath = *(char*)settingValue;
 
   return ADDON_STATUS_OK;
 }
@@ -233,9 +243,7 @@ const char *GetBackendHostname(void)
 
 PVR_ERROR GetDriveSpace(long long *iTotal, long long *iUsed)
 {
-  *iTotal = 1024 * 1024 * 1024;
-  *iUsed  = 0;
-  return PVR_ERROR_NO_ERROR;
+  return g.Tuners ? g.Tuners->PvrGetDriveSpace(iTotal, iUsed) : PVR_ERROR_SERVER_ERROR;
 }
 
 PVR_ERROR GetEPGForChannel(ADDON_HANDLE handle, const PVR_CHANNEL& channel, time_t iStart, time_t iEnd)

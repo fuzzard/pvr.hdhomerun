@@ -32,6 +32,12 @@
 #include <string>
 #include <vector>
 
+#if defined(TARGET_WINDOWS)
+#include <windows.h>
+#else
+#include <sys/statvfs.h>
+#endif
+
 #include <p8-platform/util/StringUtils.h>
 
 #include "client.h"
@@ -418,4 +424,28 @@ std::string HDHomeRunTuners::_GetChannelStreamURL(int iUniqueId)
         return jsonChannel["URL"].asString();
 
   return "";
+}
+
+PVR_ERROR HDHomeRunTuners::PvrGetDriveSpace(long long *iTotal, long long *iUsed)
+{
+  long long *iAvail = 0;
+
+#if defined(TARGET_WINDOWS)
+  if (!GetDiskFreeSpaceEx(nullptr, nullptr, static_cast<PULARGE_INTEGER>(iTotal), static_cast<PULARGE_INTEGER>(iAvail)))
+#else
+  struct statvfs stat;
+  if (statvfs(g.Settings.strRecPath.c_str(), &stat) != 0)
+#endif
+  {
+    // error happens, return old defaults
+    *iTotal = 1024 * 1024 * 1024;
+    *iUsed  = 0;
+    return PVR_ERROR_NO_ERROR;
+  }
+#if !defined(TARGET_WINDOWS)
+  *iTotal = static_cast<long long>(stat.f_blocks) * stat.f_frsize;
+  *iAvail = static_cast<long long>(stat.f_bavail) * stat.f_frsize;
+#endif
+  *iUsed = (*iTotal / 1024) - (*iAvail / 1024);
+  return PVR_ERROR_NO_ERROR;
 }
